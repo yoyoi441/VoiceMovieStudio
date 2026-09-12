@@ -1,0 +1,32 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.local
+Secrets.xcconfig
+DistributionConfig.xcconfig
+*.p8
+*.p12
+*.pem
+*.mobileprovision
+id_ed25519*
+id_rsa*
+*.VMS
+*.vms
+PrivateAssets/
+TestMaterials/
+UserProjects/
+.build/
+DerivedData/
+build/
+dist/
+*.xcarchive
+*.dmg
+*.zip
+xcuserdata/
+*.xcuserstate
+__pycache__/
+*.py[cod]
+VMS 2.xcodeproj/
+VMS/Info 2.plist
+updates/appcast.xml

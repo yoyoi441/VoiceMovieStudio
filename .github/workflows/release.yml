@@ -1,0 +1,63 @@
+name: 配布版を作成
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-updates
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: 配布情報の監査
+        run: Scripts/check_distribution_privacy.sh
+      - name: バージョンを確認
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
+          printf 'RELEASE_VERSION=%s\n' "${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+          test "$(cat VERSION)" = "${RELEASE_TAG#v}"
+      - name: XcodeGen
+        run: brew install xcodegen && xcodegen generate
+      - name: テスト
+        run: swift test --package-path Packages/VMSCore
+      - name: アーカイブ
+        env:
+          UPDATE_FEED_URL: https://github.com/${{ github.repository }}/releases/latest/download/appcast.xml
+        run: |
+          xcodebuild archive -project VMS.xcodeproj -scheme VMS -configuration Release -archivePath build/VoiceMovieStudio.xcarchive -destination 'generic/platform=macOS' 'ARCHS=arm64 x86_64' ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO MARKETING_VERSION="$RELEASE_VERSION" CURRENT_PROJECT_VERSION="$RELEASE_VERSION" UPDATE_FEED_URL="$UPDATE_FEED_URL" OTHER_SWIFT_FLAGS="-debug-prefix-map $GITHUB_WORKSPACE=/Source -file-prefix-map $GITHUB_WORKSPACE=/Source"
+          codesign --force --deep --sign - build/VoiceMovieStudio.xcarchive/Products/Applications/VoiceMovieStudio.app
+          codesign --verify --deep --strict build/VoiceMovieStudio.xcarchive/Products/Applications/VoiceMovieStudio.app
+          if grep -R -a -l "$GITHUB_WORKSPACE" build/VoiceMovieStudio.xcarchive/Products/Applications/VoiceMovieStudio.app; then
+            echo "配布アプリ内にビルド環境の絶対パスが残っています。" >&2
+            exit 1
+          fi
+          mkdir -p build/updates
+          ditto -c -k --keepParent build/VoiceMovieStudio.xcarchive/Products/Applications/VoiceMovieStudio.app "build/updates/VoiceMovieStudio-$RELEASE_VERSION.zip"
+      - name: 更新情報を署名
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          test -n "$SPARKLE_PRIVATE_KEY"
+          mkdir -p build/sparkle
+          curl -fL https://github.com/sparkle-project/Sparkle/releases/download/2.9.6/Sparkle-2.9.6.tar.xz -o build/sparkle.tar.xz
+          printf '%s  %s\n' 52bf9e88cdd972fc0c81501377a880e90d47031bd8ca5462488f843e2609e192 build/sparkle.tar.xz | shasum -a 256 -c -
+          tar -xf build/sparkle.tar.xz -C build/sparkle
+          printf '%s' "$SPARKLE_PRIVATE_KEY" | build/sparkle/bin/generate_appcast --ed-key-file - --download-url-prefix "https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/" build/updates
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/updates/*.zip
+            build/updates/appcast.xml
+          generate_release_notes: true
+          prerelease: true

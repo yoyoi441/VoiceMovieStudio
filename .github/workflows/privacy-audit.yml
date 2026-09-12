@@ -1,0 +1,16 @@
+name: 配布情報の監査
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 個人設定と秘密情報を確認
+        run: Scripts/check_distribution_privacy.sh

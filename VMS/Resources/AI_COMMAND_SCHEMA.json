@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VoiceMovieStudioAICommand",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "command": { "const": "set_character_parts" },
+        "character_id": { "type": "string", "format": "uuid" },
+        "mouth_closed_layer_id": {
+          "type": ["string", "null"],
+          "format": "uuid",
+          "description": "静止時・無音時に表示する通常口。自然な閉じ口を指定し、怒り口や特殊演出の口は指定しない。"
+        },
+        "mouth_small_layer_id": { "type": ["string", "null"], "format": "uuid" },
+        "mouth_open_layer_id": { "type": ["string", "null"], "format": "uuid" },
+        "eye_open_layer_id": { "type": ["string", "null"], "format": "uuid" },
+        "eye_closed_layer_id": { "type": ["string", "null"], "format": "uuid" },
+        "mouth_speed": { "type": "number", "minimum": 0.5, "maximum": 3.0, "default": 1.0 }
+      },
+      "required": ["command", "character_id"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "command": { "const": "add_character_clip" },
+        "character_id": { "type": "string", "format": "uuid" },
+        "start": { "type": "number", "minimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "x": { "type": "number", "minimum": -1, "maximum": 1, "default": 0.80, "description": "画面中心を0とする右下の標準初期位置。右がプラス。" },
+        "y": { "type": "number", "minimum": -1, "maximum": 1, "default": 0.88, "description": "画面中心を0とする右下の標準初期位置。下がプラス。" },
+        "scale": { "type": "number", "exclusiveMinimum": 0, "default": 1.4, "description": "確定見本の位置で使用する標準倍率。" },
+        "flip_horizontal": { "type": "boolean", "description": "省略時はキャラクターに保存されたデフォルト左右反転を使用する。" },
+        "expression_id": { "type": ["string", "null"], "format": "uuid" }
+      },
+      "required": ["command", "character_id", "start", "duration"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "command": { "const": "add_subtitle" },
+        "text": { "type": "string", "minLength": 1 },
+        "start": { "type": "number", "minimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "font_name": { "type": ["string", "null"] },
+        "font_size": { "type": "number", "minimum": 1 },
+        "text_color": { "type": ["string", "null"], "pattern": "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" },
+        "decoration_color": { "type": ["string", "null"], "pattern": "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" }
+      },
+      "required": ["command", "text", "start", "duration"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "command": { "const": "create_speech_with_lipsync" },
+        "text": { "type": "string", "minLength": 1 },
+        "start": { "type": "number", "minimum": 0 },
+        "character_id": { "type": ["string", "null"], "format": "uuid" },
+        "voice_provider": { "type": "string" },
+        "speaker_id": { "type": "integer" }
+      },
+      "required": ["command", "text", "start", "voice_provider", "speaker_id"],
+      "additionalProperties": false
+    }
+  ]
+}
