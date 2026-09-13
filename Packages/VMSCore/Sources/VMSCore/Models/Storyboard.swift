@@ -5,6 +5,9 @@ public struct StoryboardPlacement: Codable, Hashable, Sendable {
     public var scale: Double = 1
     public var flipHorizontal = false
     public var isVisible = true
+    /// Nil uses the character's default expression. Optional storage preserves projects
+    /// saved before storyboard expression selection was introduced.
+    public var expressionID: UUID? = nil
     public init() {}
 }
 
@@ -141,7 +144,8 @@ public struct Storyboard: Codable, Hashable, Sendable {
                     CharacterClipData(characterID: id,
                         linkedAudioClipID: speaking && cards[index].audio != nil ? cards[index].audioID : nil,
                         position: placement.position, scale: placement.scale,
-                        mouthKeyframes: speaking ? cards[index].audio?.mouthKeyframes ?? [] : [])))
+                        mouthKeyframes: speaking ? cards[index].audio?.mouthKeyframes ?? [] : [],
+                        expressionID: placement.expressionID)))
                 clip.effects.flipHorizontal = placement.flipHorizontal
                 if index > 0, let previous = resolved[index - 1].placements[id],
                    previous.isVisible, let frames = cards[index].transitionFrames, frames > 0,

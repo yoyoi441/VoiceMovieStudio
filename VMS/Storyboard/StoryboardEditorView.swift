@@ -6,7 +6,8 @@ import VMSCore
 struct StoryboardEditorView: View {
     @Environment(ProjectStore.self) private var store
     @State private var selectedID: UUID?
-    @State private var importing = false
+    @State private var importingScenario = false
+    @State private var pendingAIImport: PendingAIStoryboardImport?
     @State private var overwrite = false
 
     private var cards: [StoryboardCard] { store.storyboard?.cards ?? [] }
@@ -19,12 +20,17 @@ struct StoryboardEditorView: View {
         let times = Dictionary(uniqueKeysWithValues: resolved.map { ($0.card.id, Double($0.startFrame) / (store.storyboard?.frameRate ?? 30)) })
         VStack(spacing: 8) {
             HStack {
-                Button("台本からコマを追加…") { importing = true }
+                Button("台本からコマを追加…") { importingScenario = true }
                 Button("コマを追加") {
                     let card = StoryboardCard(speakerID: cards.last?.speakerID, dialogue: "台詞を入力",
                                               durationFrames: Int((store.storyboard?.frameRate ?? store.newStoryboard().frameRate) * 3))
                     if store.changeStoryboard({ $0.cards.append(card) }) { selectedID = card.id }
                 }.disabled(conflict || cards.count >= 300)
+                Divider().frame(height: 18)
+                Button("AI情報を書き出す…") { exportAIInformation() }
+                    .help("キャラクター・素材・現在の絵コンテ情報を、AI編集用JSONとして書き出します")
+                Button("AI絵コンテJSONを読み込む…") { importAIStoryboard() }
+                    .help("AIが編集したJSONを検証し、適用前に差分を表示します")
                 Text("\(cards.count)コマ").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 if let board = store.storyboard {
@@ -83,7 +89,7 @@ struct StoryboardEditorView: View {
         } message: {
             Text("絵コンテ由来の項目だけを再作成します。その他の素材は変更しません。ロックされた項目は上書きしません。Undoで戻せます。")
         }
-        .sheet(isPresented: $importing) {
+        .sheet(isPresented: $importingScenario) {
             ScenarioImportView(existingCardCount: cards.count, conflict: conflict) { added, replaceExisting in
                 guard !added.isEmpty else { return }
                 let changed = store.changeStoryboard { board in
@@ -92,7 +98,23 @@ struct StoryboardEditorView: View {
                 }
                 if changed {
                     selectedID = added.first?.id
-                    importing = false
+                    importingScenario = false
+                }
+            }
+        }
+        .sheet(item: $pendingAIImport) { pending in
+            AIStoryboardImportReviewView(
+                result: pending.result,
+                characterNames: store.project.characters.reduce(into: [:]) { $0[$1.id] = $1.name },
+                timelineConflict: conflict
+            ) { force in
+                let changed = store.changeStoryboard(force: force) { board in
+                    board = pending.result.storyboard
+                }
+                if changed {
+                    selectedID = pending.result.differences.first(where: { $0.after != nil && $0.kind != .unchanged })?.after?.id
+                        ?? pending.result.storyboard.cards.first?.id
+                    pendingAIImport = nil
                 }
             }
         }
@@ -105,6 +127,56 @@ struct StoryboardEditorView: View {
     private func speakerName(_ id: UUID?) -> String {
         id.flatMap { store.project.character(withID: $0)?.name } ?? "字幕のみ"
     }
+
+    private func exportAIInformation() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.canCreateDirectories = true
+        panel.nameFieldStringValue = "AI絵コンテ.json"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            let document = AIStoryboardExchange.makeDocument(project: store.project, scene: store.currentScene)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+            try encoder.encode(document).write(to: url, options: .atomic)
+        } catch {
+            store.errorMessage = "AI情報を書き出せませんでした：\(error.localizedDescription)"
+        }
+    }
+
+    private func importAIStoryboard() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        do {
+            let values = try url.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
+            guard values.isRegularFile == true, (values.fileSize ?? 0) <= 4 * 1_024 * 1_024 else {
+                throw AIStoryboardFileError.invalidSize
+            }
+            let data = try Data(contentsOf: url, options: [.mappedIfSafe])
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let document = try decoder.decode(AIStoryboardExchangeDocument.self, from: data)
+            let result = try AIStoryboardExchange.validate(document, project: store.project, scene: store.currentScene)
+            pendingAIImport = PendingAIStoryboardImport(result: result)
+        } catch {
+            store.errorMessage = "AI絵コンテJSONを読み込めませんでした：\(error.localizedDescription)"
+        }
+    }
+}
+
+private struct PendingAIStoryboardImport: Identifiable {
+    let id = UUID()
+    let result: AIStoryboardImportResult
+}
+
+private enum AIStoryboardFileError: Error, LocalizedError {
+    case invalidSize
+    var errorDescription: String? { "JSONは4MB以内の通常ファイルを選んでください。" }
 }
 
 /// Resizes the real compositor; does not mutate timeline clips by dragging a separate preview.
@@ -189,6 +261,16 @@ private struct StoryboardCardInspector: View {
                 Toggle("表示する", isOn: Binding(get: { placement.isVisible }, set: { value in
                     setPlacement { $0.isVisible = value }
                 }))
+                if let character = store.project.character(withID: id), !character.expressions.isEmpty {
+                    Picker("表情", selection: Binding(get: { placement.expressionID }, set: { value in
+                        setPlacement { $0.expressionID = value }
+                    })) {
+                        Text("キャラクターの初期表情").tag(UUID?.none)
+                        ForEach(character.expressions) { expression in
+                            Text(expression.name).tag(UUID?.some(expression.id))
+                        }
+                    }
+                }
                 Button("このコマの指定を解除して前から継承") {
                     store.editStoryboardCard(card.id) { $0.placements.removeValue(forKey: id) }
                 }.disabled(card.placements[id] == nil)
