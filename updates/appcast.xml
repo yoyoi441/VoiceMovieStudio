@@ -3,12 +3,12 @@
     <channel>
         <title>VoiceMovieStudio</title>
         <item>
-            <title>1.2.1</title>
-            <pubDate>Tue, 15 Sep 2026 20:00:17 +0000</pubDate>
-            <sparkle:version>1.2.1</sparkle:version>
-            <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+            <title>1.2.2</title>
+            <pubDate>Tue, 15 Sep 2026 20:13:33 +0000</pubDate>
+            <sparkle:version>1.2.2</sparkle:version>
+            <sparkle:shortVersionString>1.2.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/yoyoi441/VoiceMovieStudio/releases/download/v1.2.1/VoiceMovieStudio-1.2.1.zip" length="6800746" type="application/octet-stream" sparkle:edSignature="Zs+Sjdj6rGlDsA5xAvjfJyjB/+yc3I/b3kBNEv2e+7g9sHQJpt/n1msxvLCvx+uoy304erbtZ/QKLFaq3DHiAQ=="/>
+            <enclosure url="https://github.com/yoyoi441/VoiceMovieStudio/releases/download/v1.2.2/VoiceMovieStudio-1.2.2.zip" length="6801204" type="application/octet-stream" sparkle:edSignature="OpRt7XqVbLOh6nH2+4NJ60YOAG1JVxGK2O27sj+Ts4SV2NkOKyDp2TEiEFwGGxtXSqztBpr5ESvqPH1o1SbWAA=="/>
         </item>
     </channel>
 </rss>
