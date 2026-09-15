@@ -51,3 +51,38 @@ import Testing
     character.voiceLibrary = ""
     #expect(CharacterVoicePreset(character: character).resolveVoiceVox(in: candidates)?.id == 1)
 }
+
+@Test func sofTalkPresetRoundTripsWithoutInventingSpeakerID() throws {
+    let source = Character(
+        name: "霊夢", baseImageFileName: "reimu.png", defaultSpeakerID: 123,
+        defaultVoiceSettings: .sofTalkDefault,
+        voiceProvider: SofTalkSupport.providerID,
+        voiceLibrary: SofTalkSupport.BuiltInProfile.reimu.rawValue,
+        voiceStyle: SofTalkSupport.BuiltInProfile.reimu.displayName
+    )
+    let encoded = try JSONEncoder().encode(CharacterVoicePreset(character: source))
+    let restored = try JSONDecoder().decode(CharacterVoicePreset.self, from: encoded)
+    var target = Character(name: "対象", baseImageFileName: "target.png")
+    restored.apply(to: &target)
+
+    #expect(target.voiceProvider == SofTalkSupport.providerID)
+    #expect(target.voiceLibrary == "reimu")
+    #expect(target.voiceStyle == "ゆっくり霊夢")
+    #expect(target.defaultSpeakerID == nil)
+}
+
+@Test func sofTalkSettingsAreFiniteAndClamped() {
+    let settings = VoiceSettings(
+        volume: .infinity, pan: -4, pitch: 9, speed: 0,
+        intonation: .nan, preSilence: -1, postSilence: 99,
+        styleWeights: ["推測した感情": 1]
+    ).validatedForSofTalk()
+    #expect(settings.volume == 1)
+    #expect(settings.pan == -1)
+    #expect(settings.pitch == 2)
+    #expect(settings.speed == 0.5)
+    #expect(settings.intonation == 1)
+    #expect(settings.preSilence == 0)
+    #expect(settings.postSilence == 5)
+    #expect(settings.styleWeights == nil)
+}

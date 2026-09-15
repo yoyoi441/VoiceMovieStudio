@@ -23,10 +23,13 @@ struct VoicePanelView: View {
             Picker("音声連携", selection: $provider) {
                 Text("VOICEVOX").tag("VOICEVOX")
                 Text("A.I.VOICE2").tag("A.I.VOICE2")
+                Text("SofTalk").tag(SofTalkSupport.providerID)
             }.pickerStyle(.segmented).disabled(isSynthesizing)
             characterPicker.disabled(isSynthesizing || store.aiv2Catalog.isBusy)
 
-            if provider != "VOICEVOX" {
+            if provider == SofTalkSupport.providerID {
+                SofTalkPanel(characterID: $selectedCharacterID).id(provider)
+            } else if provider != "VOICEVOX" {
                 ExternalVoicePanel(provider: provider, characterID: $selectedCharacterID).id(provider)
             } else {
 
@@ -133,7 +136,7 @@ struct VoicePanelView: View {
 
     private func applyVoicePreset() {
         guard let assignment = selectedVoicePreset else { return }
-        guard ["VOICEVOX", "A.I.VOICE2"].contains(assignment.provider) else { return }
+        guard ["VOICEVOX", "A.I.VOICE2", SofTalkSupport.providerID].contains(assignment.provider) else { return }
         provider = assignment.provider
         if assignment.provider == "VOICEVOX" {
             draftSettings = assignment.settings.validatedForVoiceVox()

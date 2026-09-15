@@ -61,7 +61,8 @@ extension ProjectStore {
             return "対象にロック中の項目があります。ロックを解除してから実行してください。"
         }
         if regenerateVoice {
-            let canGenerate = if target.voiceProvider == "A.I.VOICE2" {
+            let canGenerate = if target.voiceProvider == "A.I.VOICE2"
+                || target.voiceProvider == SofTalkSupport.providerID {
                 !target.voiceLibrary.isEmpty
             } else {
                 (target.voiceProvider.isEmpty || target.voiceProvider == "VOICEVOX")
@@ -124,6 +125,17 @@ extension ProjectStore {
                         )
                         amplitudeMouthKeyframes = analysis.mouthKeyframes
                         expectedProvider = "A.I.VOICE2"
+                    } else if target.voiceProvider == SofTalkSupport.providerID {
+                        settings = target.defaultVoiceSettings.validatedForSofTalk()
+                        let result = try await SofTalkSynthesisService.speech(
+                            text: sourceText,
+                            profileID: target.voiceLibrary,
+                            settings: settings,
+                            mouthSpeed: target.defaultMouthSpeed
+                        )
+                        speech = result.speech
+                        amplitudeMouthKeyframes = result.mouthKeyframes
+                        expectedProvider = SofTalkSupport.providerID
                     } else {
                         guard let speakerID = target.defaultSpeakerID else {
                             throw SpeechRegeneration.Failure.invalid
@@ -144,6 +156,7 @@ extension ProjectStore {
                     var configuredData = originalData
                     configuredData.voiceProvider = expectedProvider
                     configuredData.speakerID = target.voiceProvider == "A.I.VOICE2"
+                        || target.voiceProvider == SofTalkSupport.providerID
                         ? nil : target.defaultSpeakerID
                     configuredData.voiceLibrary = target.voiceLibrary
                     configuredData.voiceStyle = target.voiceStyle

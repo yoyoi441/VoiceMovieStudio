@@ -24,10 +24,14 @@ struct BulkEditView: View {
 
     private var canRegenerateVoice: Bool {
         guard let targetCharacter else { return false }
-        let configured = targetCharacter.voiceProvider == "A.I.VOICE2"
-            ? !targetCharacter.voiceLibrary.isEmpty
-            : (targetCharacter.voiceProvider.isEmpty || targetCharacter.voiceProvider == "VOICEVOX")
+        let configured: Bool
+        if targetCharacter.voiceProvider == "A.I.VOICE2"
+            || targetCharacter.voiceProvider == SofTalkSupport.providerID {
+            configured = !targetCharacter.voiceLibrary.isEmpty
+        } else {
+            configured = (targetCharacter.voiceProvider.isEmpty || targetCharacter.voiceProvider == "VOICEVOX")
                 && targetCharacter.defaultSpeakerID != nil
+        }
         return configured && !match.audioClipIDs.isEmpty
     }
 

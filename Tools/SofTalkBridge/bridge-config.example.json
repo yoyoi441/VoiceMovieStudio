@@ -1,0 +1,24 @@
+{
+  "executable": "C:\\Tools\\SofTalk\\SofTalk.exe",
+  "host": "127.0.0.1",
+  "port": 18881,
+  "hideWindow": true,
+  "timeoutSeconds": 120,
+  "profiles": {
+    "reimu": {
+      "displayName": "ゆっくり霊夢",
+      "enabled": false,
+      "arguments": []
+    },
+    "marisa": {
+      "displayName": "ゆっくり魔理沙",
+      "enabled": false,
+      "arguments": []
+    }
+  },
+  "parameterArguments": {
+    "volume": "/V:{percent}",
+    "speed": "/S:{percent}",
+    "pitch": null
+  }
+}

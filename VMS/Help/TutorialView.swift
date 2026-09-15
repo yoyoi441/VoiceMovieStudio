@@ -17,8 +17,10 @@ struct TutorialView: View {
         TutorialPage(title: "素材を編集画面へドロップ", symbol: "square.and.arrow.down", message: "Finderから動画・画像・音声・キャラクター素材を、そのまま編集画面へドラッグしてください。", tips: ["動画・音声・画像はタイムラインへ追加されます", "プロファイルや立ち絵パーツはキャラクター管理へ登録されます", "未対応形式は理由を表示します"]),
         TutorialPage(title: "タイムラインで組み立てる", symbol: "timeline.selection", message: "アイテムの中央をドラッグして移動し、左右端をドラッグして長さを調整します。", tips: ["Spaceで再生／停止", "空き部分のクリックで赤い再生ヘッドを移動", "Command+Bで再生位置から分割"]),
         TutorialPage(title: "声・字幕・キャラクター", symbol: "waveform.and.mic", message: "音声エンジンへ接続して文章を入力すると、声・字幕・キャラクターを一度に追加できます。", tips: ["キャラクター管理で立ち絵と口画像を登録", "プレビュー上で文字やキャラクターを直接移動", "詳細パネルから音量や表示方法を調整"]),
+        TutorialPage(title: "WindowsのSofTalkと連携", symbol: "network", message: "Windows側のSofTalkへHTTPSで接続し、割り当て済みの霊夢・魔理沙の声から音声を作れます。", tips: ["WindowsへSofTalk本体・音源・付属ブリッジを利用者自身で用意", "声の番号を推測せず、試聴確認した割り当てだけを有効化", "接続トークンはキーチェーンへ保存し、プロジェクトへ含めない", "詳しい設定はヘルプセンターの「SofTalkと霊夢・魔理沙の声を使う」を確認"]),
         TutorialPage(title: "クレジットを自動作成", symbol: "doc.on.clipboard", message: "「クレジット」を開くと、実際に使用している素材だけから概要欄用テキストを作成します。", tips: ["重複した素材は一つにまとめます", "作者名や配布元が不足している場合は警告します", "ボタン一つでクリップボードへコピーできます"]),
         TutorialPage(title: "このMac／リモートMacでAI編集", symbol: "sparkles", message: "同じMac、または自宅の高性能なMacを使って、文字起こし・重要箇所抽出・クリップ作成を実行できます。", tips: ["編集画面の「AI」で実行場所を選択", "このMacは127.0.0.1、リモートMacはTailnet限定HTTPSで接続", "接続先・モデル・トークンは実行場所ごとに保存", "文字起こし結果を字幕やクリップへ反映"]),
+        TutorialPage(title: "AIの絵コンテを安全に仮組み", symbol: "rectangle.2.swap", message: "現在の素材と絵コンテ情報をJSONでAIへ渡し、返された編集案を差分確認してから仮組みできます。", tips: ["絵コンテ画面で「AI情報を書き出す…」を選択", "AIにはJSON内のinstructionsに従いproposalだけを編集させます", "「AI絵コンテJSONを読み込む…」で不正なIDや数値を検証", "追加・変更・削除を確認してから仮組み。Command+Zで一括取消"]),
         TutorialPage(title: "確認して動画出力", symbol: "square.and.arrow.up", message: "再生して内容を確認し、保存してから「動画出力」で完成動画を書き出します。", tips: ["保存はCommand+S", "困ったときはヘルプセンターを検索", "これで準備完了です"])
     ]
 

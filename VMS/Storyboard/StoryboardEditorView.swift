@@ -345,13 +345,17 @@ private struct StoryboardCardInspector: View {
         card.speakerID.flatMap { store.project.character(withID: $0) }
     }
     private var voiceGenerationTitle: String {
-        assignedCharacter?.voiceProvider == "A.I.VOICE2"
-            ? "A.I.VOICE2で音声生成" : "VOICEVOXで音声生成"
+        switch assignedCharacter?.voiceProvider {
+        case "A.I.VOICE2": "A.I.VOICE2で音声生成"
+        case SofTalkSupport.providerID: "SofTalkで音声生成"
+        default: "VOICEVOXで音声生成"
+        }
     }
     private var canGenerateVoice: Bool {
         guard !card.dialogue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let character = assignedCharacter else { return false }
         if character.voiceProvider == "A.I.VOICE2" { return !character.voiceLibrary.isEmpty }
+        if character.voiceProvider == SofTalkSupport.providerID { return !character.voiceLibrary.isEmpty }
         return (character.voiceProvider.isEmpty || character.voiceProvider == "VOICEVOX")
             && character.defaultSpeakerID != nil
     }
@@ -400,6 +404,19 @@ private struct StoryboardCardInspector: View {
                     data.licenseNotes = character?.usageTerms ?? ""
                     result.audioClip.content = .audio(data)
                 }
+            } else if let assignment, assignment.provider == SofTalkSupport.providerID {
+                guard !assignment.speakerName.isEmpty else {
+                    store.errorMessage = "キャラクター管理でSofTalkの話者プリセットを指定してください。"
+                    return
+                }
+                result = try await SofTalkSynthesisService.importSpeech(
+                    text: original.dialogue,
+                    profileID: assignment.speakerName,
+                    settings: assignment.settings.validatedForSofTalk(),
+                    character: character,
+                    startTime: 0,
+                    assetsDirectory: assets
+                )
             } else {
                 let speakers = try await store.voiceEngine.availableSpeakers()
                 guard let assignment, let speaker = assignment.resolveVoiceVox(in: speakers) else {

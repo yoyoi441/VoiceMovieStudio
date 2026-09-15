@@ -12,9 +12,9 @@ Sparkle 2.9.6で1日ごとに更新を確認し、署名済みの更新をダウ
 
 1. `VERSION`、`project.yml`、READMEの表示版を同じ番号へ更新します。
 2. テストとビルドを確認し、変更をmainへpushします。
-3. `VERSION`と同じ `v1.2.0` 形式のタグを作成してpushします。
-4. 配布ワークフローがIntel／Apple Silicon共通版を作り、署名済みZIPをGitHub Releaseへ公開します。
-5. ワークフローが `updates/appcast.xml` をmainへ反映すると、アプリ内のバージョンアップ対象になります。
+3. `VERSION`と同じ `v1.2.1` 形式のタグを作成してpushします。
+4. 配布ワークフローがIntel／Apple Silicon共通版を作り、署名済みZIPを公開プレリリースへ公開します。Releaseを下書きのまま残したり、公開後にタグを削除しないでください。
+5. ワークフローが `updates/appcast.xml` をmainへ反映すると、固定URLからプレリリースを検出できるようになります。mainが保護されている場合はGitHub Actionsによる更新フィードのpushを許可してください。
 
 署名秘密鍵はGitHub Actionsの `SPARKLE_PRIVATE_KEY` Secretで管理します。
 公開鍵は `project.yml` の `SUPublicEDKey`、確認先は `SUFeedURL` です。
@@ -23,5 +23,6 @@ Sparkle 2.9.6で1日ごとに更新を確認し、署名済みの更新をダウ
 
 旧版にはインストール機構がないため、自動更新対応版の初回導入は手動で必要です。
 AppleのDeveloper ID署名・公証は別途対応が必要です。現在は開発版としてアドホック署名しています。
+`example.invalid`を参照するローカルDebug版では更新確認を実行せず、配布版が必要だと案内します。
 
 参考: https://sparkle-project.org/documentation/
