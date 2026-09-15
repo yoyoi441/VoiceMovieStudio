@@ -82,6 +82,12 @@ final class UpdateController: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func updater(_ updater: SPUUpdater, didAbortWithError error: any Error) {
+        let nsError = error as NSError
+        if nsError.domain == SUSparkleErrorDomain,
+           nsError.code == Int(SUError.noUpdateError.rawValue) {
+            statusMessage = "最新版を使用しています。"
+            return
+        }
         statusMessage = "更新を確認できませんでした：\(error.localizedDescription)"
     }
 

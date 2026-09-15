@@ -12,7 +12,7 @@ Sparkle 2.9.6で1日ごとに更新を確認し、署名済みの更新をダウ
 
 1. `VERSION`、`project.yml`、READMEの表示版を同じ番号へ更新します。
 2. テストとビルドを確認し、変更をmainへpushします。
-3. `VERSION`と同じ `v1.2.1` 形式のタグを作成してpushします。
+3. `VERSION`と同じ `v1.2.2` 形式のタグを作成してpushします。
 4. 配布ワークフローがIntel／Apple Silicon共通版を作り、署名済みZIPを公開プレリリースへ公開します。Releaseを下書きのまま残したり、公開後にタグを削除しないでください。
 5. ワークフローが `updates/appcast.xml` をmainへ反映すると、固定URLからプレリリースを検出できるようになります。mainが保護されている場合はGitHub Actionsによる更新フィードのpushを許可してください。
 

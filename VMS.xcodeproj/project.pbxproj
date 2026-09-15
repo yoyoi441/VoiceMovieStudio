@@ -740,14 +740,14 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.1;
+				CURRENT_PROJECT_VERSION = 1.2.2;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = VMS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.2.2;
 				OTHER_SWIFT_FLAGS = "$(inherited) -debug-prefix-map $(SRCROOT)=/Source -file-prefix-map $(SRCROOT)=/Source";
 				PRODUCT_BUNDLE_IDENTIFIER = com.voicemoviestudio.app;
 				PRODUCT_NAME = VoiceMovieStudio;
@@ -764,14 +764,14 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.1;
+				CURRENT_PROJECT_VERSION = 1.2.2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = VMS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.2.2;
 				OTHER_SWIFT_FLAGS = "$(inherited) -debug-prefix-map $(SRCROOT)=/Source -file-prefix-map $(SRCROOT)=/Source";
 				PRODUCT_BUNDLE_IDENTIFIER = com.voicemoviestudio.app;
 				PRODUCT_NAME = VoiceMovieStudio;
