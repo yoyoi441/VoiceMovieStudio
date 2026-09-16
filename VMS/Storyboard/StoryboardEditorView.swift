@@ -355,6 +355,8 @@ private struct StoryboardCardInspector: View {
     private var canGenerateVoice: Bool {
         guard !card.dialogue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let character = assignedCharacter else { return false }
+        let providerID = character.voiceProvider.isEmpty ? "VOICEVOX" : character.voiceProvider
+        guard store.voiceIntegrations.isEnabled(providerID: providerID) else { return false }
         if character.voiceProvider == "A.I.VOICE2" { return !character.voiceLibrary.isEmpty }
         if character.voiceProvider == AquesTalkPlayerSupport.providerID {
             return AquesTalkPlayerService.isReady

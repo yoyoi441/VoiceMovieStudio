@@ -97,6 +97,12 @@ import Testing
     ) == ["-T", "こんにちは", "-W", "/tmp/test.wav"])
 }
 
+@Test func aquesTalkPlayerPresetNamesKeepMenuOrderAndRemoveInvalidRows() {
+    #expect(AquesTalkPlayerSupport.normalizedPresetNames([
+        " デフォルト ", "れいむ", "", "-", "れいむ", "まりさ\n"
+    ]) == ["デフォルト", "れいむ", "まりさ"])
+}
+
 @Test func aquesTalkPlayerPresetRoundTripsWithoutStoringLicenseKey() throws {
     let source = Character(
         name: "霊夢", baseImageFileName: "reimu.png", defaultSpeakerID: 7,

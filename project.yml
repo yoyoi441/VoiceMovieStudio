@@ -32,8 +32,8 @@ targets:
       base:
         PRODUCT_NAME: VoiceMovieStudio
         PRODUCT_BUNDLE_IDENTIFIER: com.voicemoviestudio.app
-        MARKETING_VERSION: "1.2.4"
-        CURRENT_PROJECT_VERSION: "1.2.4"
+        MARKETING_VERSION: "1.2.5"
+        CURRENT_PROJECT_VERSION: "1.2.5"
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "-"
         UPDATE_FEED_URL: https://example.invalid/VoiceMovieStudio/appcast.xml

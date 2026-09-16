@@ -53,8 +53,10 @@ final class ProjectStore {
     private(set) var currentPackageURL: URL?
 
     let voiceEngine: VoiceEngine = VoiceVoxClient()
+    let voiceIntegrations = VoiceIntegrationSettings()
     let aiv2Catalog = AIVoice2Catalog()
     let aiv2Automation = AIVoice2AutomationClient()
+    let aquesTalkPresetCatalog = AquesTalkPlayerPresetCatalog()
     let imageProvider: CharacterImageProvider
     let videoFrameProvider: VideoFrameProvider
 

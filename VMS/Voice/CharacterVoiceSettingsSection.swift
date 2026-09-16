@@ -17,16 +17,24 @@ struct CharacterVoiceSettingsSection: View {
         PropertySection("音声ソフト・話者") {
             Picker("使用ソフト", selection: stringBinding(\.voiceProvider)) {
                 Text("未指定").tag("")
-                Text("VOICEVOX").tag("VOICEVOX")
-                Text("A.I.VOICE2").tag("A.I.VOICE2")
-                Text("AquesTalk Player").tag(AquesTalkPlayerSupport.providerID)
-                Text("Mac音声").tag(MacSystemVoiceSupport.providerID)
-                if !["", "VOICEVOX", "A.I.VOICE2", AquesTalkPlayerSupport.providerID, MacSystemVoiceSupport.providerID]
-                    .contains(character.voiceProvider) {
-                    Text("保存済み：\(character.voiceProvider)").tag(character.voiceProvider)
+                ForEach(store.voiceIntegrations.enabledIntegrations) { integration in
+                    Text(integration.title).tag(integration.rawValue)
+                }
+                if !character.voiceProvider.isEmpty,
+                   !store.voiceIntegrations.enabledIntegrations.map(\.rawValue).contains(character.voiceProvider) {
+                    Text("保存済み：\(character.voiceProvider)（連携オフ）").tag(character.voiceProvider)
                 }
             }
-            if character.voiceProvider == "VOICEVOX" {
+            if VoiceIntegration.from(providerID: character.voiceProvider) != nil,
+               !store.voiceIntegrations.isEnabled(providerID: character.voiceProvider) {
+                HStack {
+                    Label("この音声連携は設定でオフになっています。保存済みの指定は保持されています。", systemImage: "speaker.slash")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    SettingsLink { Image(systemName: "gearshape") }
+                        .help("音声連携の設定を開く")
+                }
+            } else if character.voiceProvider == "VOICEVOX" {
                 Button(loading ? "読み取り中…" : "VOICEVOXから話者を読み取る") {
                     Task { await loadVoiceVox() }
                 }.disabled(loading)
@@ -66,13 +74,14 @@ struct CharacterVoiceSettingsSection: View {
                 Text(store.aiv2Catalog.status).font(.caption).foregroundStyle(.secondary)
             } else if character.voiceProvider == AquesTalkPlayerSupport.providerID {
                 HStack {
-                    Button("AquesTalk Playerを起動") {
-                        Task {
-                            do { try await AquesTalkPlayerService.launch() }
-                            catch { message = error.localizedDescription }
-                        }
+                    Button("起動してプリセットを読む") {
+                        Task { await store.aquesTalkPresetCatalog.launchAndRead() }
                     }
                     .disabled(aquesTalkInstallation == nil)
+                    Button("一覧を再読み取り") {
+                        Task { await store.aquesTalkPresetCatalog.refresh(promptIfNeeded: true) }
+                    }
+                    .disabled(aquesTalkInstallation == nil || store.aquesTalkPresetCatalog.isBusy)
                     Button("場所を設定…") {
                         if let selected = AquesTalkPlayerService.selectApplication() {
                             aquesTalkInstallation = selected
@@ -84,16 +93,34 @@ struct CharacterVoiceSettingsSection: View {
                 Text(aquesTalkInstallation.map { "検出済み v\($0.version)" } ?? "AquesTalk Playerは未検出です。")
                     .font(.caption)
                     .foregroundStyle(aquesTalkInstallation == nil ? Color.orange : Color.secondary)
-                TextField("プリセット名（空欄はPlayerの最後の設定）", text: stringBinding(\.voiceLibrary))
-                Text(AquesTalkPlayerSupport.commercialUseNotice)
-                    .font(.caption).foregroundStyle(.orange)
-                Toggle("公式の利用条件を確認しました", isOn: $aquesTalkLicenseAcknowledged)
-                HStack {
-                    Link("利用条件", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
-                    Link("使用ライセンス", destination: URL(string: AquesTalkPlayerSupport.licenseStoreURL)!)
-                }.font(.caption)
-                Text("ライセンスキーはAquesTalk Player側で設定し、VMSには入力しません。")
-                    .font(.caption2).foregroundStyle(.secondary)
+                Picker("プリセット", selection: stringBinding(\.voiceLibrary)) {
+                    Text("Playerで最後に選択したもの").tag("")
+                    ForEach(store.aquesTalkPresetCatalog.names, id: \.self) { Text($0).tag($0) }
+                    if !character.voiceLibrary.isEmpty,
+                       !store.aquesTalkPresetCatalog.names.contains(character.voiceLibrary) {
+                        Text("保存済み：\(character.voiceLibrary)（未確認）").tag(character.voiceLibrary)
+                    }
+                }
+                .disabled(store.aquesTalkPresetCatalog.isBusy)
+                Text(store.aquesTalkPresetCatalog.status).font(.caption).foregroundStyle(.secondary)
+                DisclosureGroup("プリセット名を手入力（一覧を読めない場合）") {
+                    TextField("Player側の正確なプリセット名", text: stringBinding(\.voiceLibrary))
+                }
+                if !aquesTalkLicenseAcknowledged {
+                    GroupBox("初回確認") {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(AquesTalkPlayerSupport.commercialUseNotice)
+                                .font(.caption).foregroundStyle(.orange)
+                            Toggle("公式の利用条件を理解しました", isOn: $aquesTalkLicenseAcknowledged)
+                            HStack {
+                                Link("利用条件", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
+                                Link("使用ライセンス", destination: URL(string: AquesTalkPlayerSupport.licenseStoreURL)!)
+                            }.font(.caption)
+                            Text("確認後は設定画面へ移動します。ライセンスキーはPlayer側だけで管理します。")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
             } else if character.voiceProvider == MacSystemVoiceSupport.providerID {
                 HStack {
                     Button("霊夢向け") { applyMacProfile(.reimu) }
@@ -143,7 +170,12 @@ struct CharacterVoiceSettingsSection: View {
                 draftSettings = value.validatedForVoiceVox()
             }
         }
-        .onAppear { aquesTalkInstallation = AquesTalkPlayerService.installation() }
+        .task {
+            aquesTalkInstallation = AquesTalkPlayerService.installation()
+            if character.voiceProvider == AquesTalkPlayerSupport.providerID {
+                await store.aquesTalkPresetCatalog.refresh()
+            }
+        }
     }
 
     private func edit(_ change: (inout Character) -> Void) {

@@ -142,6 +142,10 @@ struct ContentView: View {
                 Label("バージョンアップ", systemImage: "arrow.triangle.2.circlepath")
             }
             .help("現在のバージョンを確認して更新します")
+            SettingsLink {
+                Image(systemName: "gearshape")
+            }
+            .help("設定")
             Button {
                 store.isShowingHelp = true
             } label: {

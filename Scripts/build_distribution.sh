@@ -38,6 +38,11 @@ cp Tools/AIWorker/README.md Tools/AIWorker/install.sh Tools/AIWorker/uninstall.s
 ln -s /Applications "$stage_path/Applications"
 if [[ -n "${DEVELOPER_ID_IDENTITY:-}" ]]; then
   codesign --force --deep --options runtime --timestamp --sign "$DEVELOPER_ID_IDENTITY" "$stage_path/VoiceMovieStudio.app"
+else
+  # Sparkle is distributed with its own signature. On recent macOS releases an
+  # ad-hoc-signed host cannot map a nested framework with a different Team ID, so
+  # local/test distributions must recursively use one consistent ad-hoc signature.
+  codesign --force --deep --sign - "$stage_path/VoiceMovieStudio.app"
 fi
 codesign --verify --deep --strict "$stage_path/VoiceMovieStudio.app"
 

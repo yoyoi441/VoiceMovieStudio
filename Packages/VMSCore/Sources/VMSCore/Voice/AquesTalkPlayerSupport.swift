@@ -17,4 +17,15 @@ public enum AquesTalkPlayerSupport {
         arguments += ["-W", wavPath]
         return arguments
     }
+
+    /// Keeps the order shown by AquesTalk Player while removing menu separators,
+    /// blank rows and duplicate names exposed by the accessibility menu.
+    public static func normalizedPresetNames(_ names: [String]) -> [String] {
+        var seen: Set<String> = []
+        return names.compactMap { raw in
+            let name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty, name != "-", seen.insert(name).inserted else { return nil }
+            return name
+        }
+    }
 }

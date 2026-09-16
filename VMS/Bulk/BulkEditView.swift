@@ -24,6 +24,8 @@ struct BulkEditView: View {
 
     private var canRegenerateVoice: Bool {
         guard let targetCharacter else { return false }
+        let providerID = targetCharacter.voiceProvider.isEmpty ? "VOICEVOX" : targetCharacter.voiceProvider
+        guard store.voiceIntegrations.isEnabled(providerID: providerID) else { return false }
         let configured: Bool
         if targetCharacter.voiceProvider == "A.I.VOICE2"
             || targetCharacter.voiceProvider == AquesTalkPlayerSupport.providerID

@@ -17,8 +17,12 @@ struct AquesTalkPlayerPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Button("AquesTalk Playerを起動") { Task { await launch() } }
+                Button("起動してプリセットを読む") { Task { await launchAndReadPresets() } }
                     .disabled(installation == nil || busy)
+                Button("一覧を再読み取り") {
+                    Task { await store.aquesTalkPresetCatalog.refresh(promptIfNeeded: true) }
+                }
+                .disabled(installation == nil || busy || store.aquesTalkPresetCatalog.isBusy)
                 Button("場所を設定…") { selectApplication() }
                     .disabled(busy)
                     .help("AquesTalk Playerが自動検出されない場合だけ、アプリ本体の場所を指定します")
@@ -29,23 +33,38 @@ struct AquesTalkPlayerPanel: View {
                     .foregroundStyle(installation == nil ? Color.orange : Color.secondary)
             }
 
-            TextField("プリセット名（空欄はPlayerで最後に選択したもの）", text: $presetName)
-                .textFieldStyle(.roundedBorder)
+            Picker("プリセット", selection: $presetName) {
+                Text("Playerで最後に選択したもの").tag("")
+                ForEach(store.aquesTalkPresetCatalog.names, id: \.self) { Text($0).tag($0) }
+                if !presetName.isEmpty && !store.aquesTalkPresetCatalog.names.contains(presetName) {
+                    Text("保存済み：\(presetName)（未確認）").tag(presetName)
+                }
+            }
+            .disabled(store.aquesTalkPresetCatalog.isBusy)
+            DisclosureGroup("プリセット名を手入力（一覧を読めない場合）") {
+                TextField("Player側の正確なプリセット名", text: $presetName)
+                    .textFieldStyle(.roundedBorder)
+            }
+            Text(store.aquesTalkPresetCatalog.status)
+                .font(.caption)
+                .foregroundStyle(.secondary)
             TextField("セリフを入力…", text: $text, axis: .vertical)
                 .lineLimit(1...3)
 
-            GroupBox("利用条件") {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(AquesTalkPlayerSupport.commercialUseNotice)
+            if !licenseAcknowledged {
+                GroupBox("初回確認") {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(AquesTalkPlayerSupport.commercialUseNotice)
+                            .font(.caption)
+                        Toggle("公式の利用条件を理解しました", isOn: $licenseAcknowledged)
+                        HStack {
+                            Link("利用条件を確認", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
+                            Link("使用ライセンス", destination: URL(string: AquesTalkPlayerSupport.licenseStoreURL)!)
+                        }
                         .font(.caption)
-                    Toggle("公式の利用条件を確認しました", isOn: $licenseAcknowledged)
-                    HStack {
-                        Link("利用条件を確認", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
-                        Link("使用ライセンス", destination: URL(string: AquesTalkPlayerSupport.licenseStoreURL)!)
+                        Text("確認後はこの欄が消え、設定画面から変更できます。ライセンスキーはPlayer側だけで管理します。")
+                            .font(.caption2).foregroundStyle(.secondary)
                     }
-                    .font(.caption)
-                    Text("ライセンスキーはAquesTalk Player側で設定します。VMSはキーを保存・表示・プロジェクトへ記録しません。")
-                        .font(.caption2).foregroundStyle(.secondary)
                 }
             }
 
@@ -69,7 +88,11 @@ struct AquesTalkPlayerPanel: View {
             Text("プリセットはAquesTalk Playerで作成・調整します。VMSは公式コマンドでWAVを書き出し、字幕と音量ベースの口パクを追加します。")
                 .font(.caption2).foregroundStyle(.secondary)
         }
-        .onAppear { refreshInstallation(); applyCharacterDefaults() }
+        .task {
+            refreshInstallation()
+            applyCharacterDefaults()
+            await store.aquesTalkPresetCatalog.refresh()
+        }
         .onChange(of: characterID) { _, _ in applyCharacterDefaults() }
         .onDisappear { previewSound?.stop() }
     }
@@ -94,11 +117,11 @@ struct AquesTalkPlayerPanel: View {
         }
     }
 
-    private func launch() async {
-        do {
-            try await AquesTalkPlayerService.launch()
-            message = "AquesTalk Playerを起動しました。プリセットを編集できます。"
-        } catch { message = error.localizedDescription }
+    private func launchAndReadPresets() async {
+        await store.aquesTalkPresetCatalog.launchAndRead()
+        message = store.aquesTalkPresetCatalog.names.isEmpty
+            ? store.aquesTalkPresetCatalog.status
+            : "プリセット一覧を更新しました。"
     }
 
     private func applyCharacterDefaults() {

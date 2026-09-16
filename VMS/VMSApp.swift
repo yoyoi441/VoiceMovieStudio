@@ -58,6 +58,10 @@ struct VMSApp: App {
                 Button("AI編集支援を開く") { store.isShowingRemoteAI = true }
             }
         }
+        Settings {
+            AppSettingsView()
+                .environment(store)
+        }
     }
 
     @ViewBuilder

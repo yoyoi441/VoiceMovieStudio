@@ -20,21 +20,32 @@ struct VoicePanelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Picker("音声連携", selection: $provider) {
-                Text("VOICEVOX").tag("VOICEVOX")
-                Text("A.I.VOICE2").tag("A.I.VOICE2")
-                Text("AquesTalk").tag(AquesTalkPlayerSupport.providerID)
-                Text("Mac音声").tag(MacSystemVoiceSupport.providerID)
-            }.pickerStyle(.segmented).disabled(isSynthesizing)
-            characterPicker.disabled(isSynthesizing || store.aiv2Catalog.isBusy)
-
-            if provider == MacSystemVoiceSupport.providerID {
-                MacSystemVoicePanel(characterID: $selectedCharacterID).id(provider)
-            } else if provider == AquesTalkPlayerSupport.providerID {
-                AquesTalkPlayerPanel(characterID: $selectedCharacterID).id(provider)
-            } else if provider != "VOICEVOX" {
-                ExternalVoicePanel(provider: provider, characterID: $selectedCharacterID).id(provider)
+            if store.voiceIntegrations.enabledIntegrations.isEmpty {
+                HStack {
+                    Label("音声連携はすべてオフです", systemImage: "speaker.slash")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    SettingsLink {
+                        Label("音声連携を設定", systemImage: "gearshape")
+                    }
+                }
             } else {
+                Picker("音声連携", selection: $provider) {
+                    ForEach(store.voiceIntegrations.enabledIntegrations) { integration in
+                        Text(integration.title).tag(integration.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .disabled(isSynthesizing)
+                characterPicker.disabled(isSynthesizing || store.aiv2Catalog.isBusy)
+
+                if provider == MacSystemVoiceSupport.providerID {
+                    MacSystemVoicePanel(characterID: $selectedCharacterID).id(provider)
+                } else if provider == AquesTalkPlayerSupport.providerID {
+                    AquesTalkPlayerPanel(characterID: $selectedCharacterID).id(provider)
+                } else if provider != "VOICEVOX" {
+                    ExternalVoicePanel(provider: provider, characterID: $selectedCharacterID).id(provider)
+                } else {
 
             TextField("セリフを入力…", text: $text, axis: .vertical)
                 .lineLimit(2...4)
@@ -112,13 +123,20 @@ struct VoicePanelView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(isSynthesizing || text.isEmpty || selectedSpeakerID == nil)
             }
+                }
             }
         }
         .padding()
         .background(Color(nsColor: .controlBackgroundColor))
-        .task { await loadSpeakers() }
+        .task {
+            ensureEnabledProvider()
+            if store.voiceIntegrations.voiceVoxEnabled { await loadSpeakers() }
+        }
         .onChange(of: selectedVoicePreset) { _, _ in applyVoicePreset() }
         .onChange(of: provider) { _, _ in previewSound?.stop() }
+        .onChange(of: store.voiceIntegrations.enabledIntegrations.map(\.id)) { _, _ in
+            ensureEnabledProvider()
+        }
         .onDisappear { previewSound?.stop() }
     }
 
@@ -141,11 +159,22 @@ struct VoicePanelView: View {
         guard let assignment = selectedVoicePreset else { return }
         guard ["VOICEVOX", "A.I.VOICE2", AquesTalkPlayerSupport.providerID, MacSystemVoiceSupport.providerID]
             .contains(assignment.provider) else { return }
+        guard store.voiceIntegrations.isEnabled(providerID: assignment.provider) else {
+            statusMessage = "キャラクターに保存された音声連携は設定でオフになっています。"
+            return
+        }
         provider = assignment.provider
         if assignment.provider == "VOICEVOX" {
             draftSettings = assignment.settings.validatedForVoiceVox()
             selectedSpeakerID = assignment.resolveVoiceVox(in: speakers)?.id
             statusMessage = selectedSpeakerID == nil ? "プリセットの話者・スタイルが未確認です。接続後に確認してください。" : "キャラクターの音声プリセットを適用しました。"
+        }
+    }
+
+    private func ensureEnabledProvider() {
+        guard !store.voiceIntegrations.isEnabled(providerID: provider) else { return }
+        if let fallback = store.voiceIntegrations.firstEnabledProviderID {
+            provider = fallback
         }
     }
 
