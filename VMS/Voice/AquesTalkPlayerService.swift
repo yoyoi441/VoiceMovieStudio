@@ -17,6 +17,7 @@ enum AquesTalkPlayerSettings {
 struct AquesTalkPlayerInstallation: Sendable, Equatable {
     var applicationURL: URL
     var executableURL: URL
+    var bundleIdentifier: String
     var version: String
 }
 
@@ -89,10 +90,22 @@ enum AquesTalkPlayerService {
 
     static func launch() async throws {
         guard let found = installation() else { throw AquesTalkPlayerError.notInstalled }
+
+        if let running = NSRunningApplication
+            .runningApplications(withBundleIdentifier: found.bundleIdentifier)
+            .first(where: { !$0.isTerminated }) {
+            guard running.activate(options: [.activateAllWindows]) else {
+                throw AquesTalkPlayerError.launchFailed("起動中のアプリを前面に表示できませんでした。")
+            }
+            return
+        }
+
         do {
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.activates = true
             try await NSWorkspace.shared.openApplication(
                 at: found.applicationURL,
-                configuration: NSWorkspace.OpenConfiguration()
+                configuration: configuration
             )
         } catch {
             throw AquesTalkPlayerError.launchFailed(error.localizedDescription)
@@ -185,7 +198,9 @@ enum AquesTalkPlayerService {
     private static func validatedInstallation(at applicationURL: URL) -> AquesTalkPlayerInstallation? {
         let infoURL = applicationURL.appendingPathComponent("Contents/Info.plist")
         guard let dictionary = NSDictionary(contentsOf: infoURL),
-              let executable = dictionary["CFBundleExecutable"] as? String else { return nil }
+              let executable = dictionary["CFBundleExecutable"] as? String,
+              let bundleIdentifier = dictionary["CFBundleIdentifier"] as? String,
+              bundleIdentifier == AquesTalkPlayerSupport.bundleIdentifier else { return nil }
         let displayName = (dictionary["CFBundleDisplayName"] as? String)
             ?? (dictionary["CFBundleName"] as? String)
             ?? applicationURL.deletingPathExtension().lastPathComponent
@@ -198,6 +213,7 @@ enum AquesTalkPlayerService {
         return AquesTalkPlayerInstallation(
             applicationURL: applicationURL,
             executableURL: executableURL,
+            bundleIdentifier: bundleIdentifier,
             version: (dictionary["CFBundleShortVersionString"] as? String) ?? "不明"
         )
     }

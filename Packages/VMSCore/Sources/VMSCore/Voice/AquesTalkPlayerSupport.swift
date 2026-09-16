@@ -2,6 +2,7 @@ import Foundation
 
 public enum AquesTalkPlayerSupport {
     public static let providerID = "AquesTalk Player"
+    public static let bundleIdentifier = "a-quest.AquesTalkPlayer"
     public static let officialPageURL = "https://www.a-quest.com/products/aquestalkplayer.html"
     public static let manualURL = "https://www.a-quest.com/products/aquestalkplayer_mac_man.html"
     public static let licenseStoreURL = "https://store.a-quest.com/categories/618932"

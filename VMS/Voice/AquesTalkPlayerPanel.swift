@@ -19,8 +19,9 @@ struct AquesTalkPlayerPanel: View {
             HStack {
                 Button("AquesTalk Playerを起動") { Task { await launch() } }
                     .disabled(installation == nil || busy)
-                Button("アプリを選択…") { selectApplication() }
+                Button("場所を設定…") { selectApplication() }
                     .disabled(busy)
+                    .help("AquesTalk Playerが自動検出されない場合だけ、アプリ本体の場所を指定します")
                 Link("公式ダウンロード", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
                 Spacer()
                 Text(installation.map { "検出済み v\($0.version)" } ?? "未検出")

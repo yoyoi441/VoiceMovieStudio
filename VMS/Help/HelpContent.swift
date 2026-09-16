@@ -72,7 +72,7 @@ enum HelpContent {
             .init(title: "利用条件", body: "生成音声の利用条件はmacOSと選択したシステム音声の条件、キャラクター素材の規約に従います。公開前に利用範囲とクレジット要否を確認し、キャラクターの利用条件・クレジット欄へ記録してください。")
         ]),
         HelpTopic(id: "aquestalk-player", category: "音声", title: "AquesTalk Playerを連携する", symbol: "waveform.badge.plus", summary: "公式Mac版をVMSから呼び出し、プリセットによるWAV生成と口パクを行います。", sections: [
-            .init(title: "準備", body: "AQUEST公式サイトからMac版AquesTalk Playerを入手し、Applicationsへインストールします。VMSは公式アプリを同梱・再配布しません。音声パネルで「AquesTalk」を選ぶと通常のインストール先を自動検出し、別の場所にある場合は「アプリを選択…」で指定できます。"),
+            .init(title: "準備", body: "AQUEST公式サイトからMac版AquesTalk Playerを入手し、Applicationsへインストールします。VMSは公式アプリを同梱・再配布しません。音声パネルで「AquesTalk」を選ぶと通常のインストール先を自動検出し、別の場所にある場合だけ「場所を設定…」で指定できます。「AquesTalk Playerを起動」は起動済みのPlayerを前面へ表示し、ファイル選択画面は開きません。"),
             .init(title: "プリセット", body: "声種、速度、アクセントなどはAquesTalk Playerでプリセットとして作成します。VMSのプリセット名へ正確な名前を入力してください。空欄の場合はPlayerで最後に選択したプリセットを使用します。公式にプリセット一覧取得コマンドがないため、VMSは存在しない名前を推測しません。"),
             .init(title: "生成", body: "VMSは公式のコマンド実行機能でテキストとプリセット名を渡し、一時WAVを書き出します。生成後は音声、字幕、音量ベースの口パク付き立ち絵をタイムラインへ追加します。絵コンテ、一括変更、既存音声の再生成にも同じプリセットを使用します。"),
             .init(title: "利用条件", body: "AquesTalk Playerは個人かつ非営利の場合に限り無償です。収益化した動画、業務、個人事業、法人、学校・大学などでの利用にはAQUESTの使用ライセンスが必要です。条件は変更される場合があるため、出力前に公式ページを確認してください。"),

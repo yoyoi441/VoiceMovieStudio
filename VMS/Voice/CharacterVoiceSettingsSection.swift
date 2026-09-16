@@ -73,11 +73,12 @@ struct CharacterVoiceSettingsSection: View {
                         }
                     }
                     .disabled(aquesTalkInstallation == nil)
-                    Button("アプリを選択…") {
+                    Button("場所を設定…") {
                         if let selected = AquesTalkPlayerService.selectApplication() {
                             aquesTalkInstallation = selected
                         }
                     }
+                    .help("AquesTalk Playerが自動検出されない場合だけ、アプリ本体の場所を指定します")
                     Link("公式サイト", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
                 }
                 Text(aquesTalkInstallation.map { "検出済み v\($0.version)" } ?? "AquesTalk Playerは未検出です。")

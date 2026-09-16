@@ -88,6 +88,7 @@ import Testing
 }
 
 @Test func aquesTalkPlayerCommandUsesDocumentedArgumentsAndOptionalPreset() {
+    #expect(AquesTalkPlayerSupport.bundleIdentifier == "a-quest.AquesTalkPlayer")
     #expect(AquesTalkPlayerSupport.commandArguments(
         text: "こんにちは", presetName: "霊夢用", wavPath: "/tmp/test.wav"
     ) == ["-T", "こんにちは", "-P", "霊夢用", "-W", "/tmp/test.wav"])
