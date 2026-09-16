@@ -21,6 +21,7 @@
 		21A50224D3DDF5DD6CD78BD6 /* AudioCompositionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0CA16230DAC58441BA4F6E /* AudioCompositionBuilder.swift */; };
 		2280EA8D1C11D8A5C35EDCCE /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36376363E92D5E9D4C9BB32 /* TimeFormat.swift */; };
 		243A0BA91779BBF539824C02 /* LayerTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8199D89FA6C3E0448D1B9F53 /* LayerTree.swift */; };
+		24806E52928D3F72AC04087A /* AquesTalkPlayerPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A003E602FEC1CF2F6BC4E6F /* AquesTalkPlayerPanel.swift */; };
 		27190ED60D45048CE590D959 /* StoryboardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C347E5950B45BEC49A85F2 /* StoryboardEditorView.swift */; };
 		282EC0702C9B36EB42D5CD5A /* VoiceStylePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17668A922533A12D0A08F382 /* VoiceStylePicker.swift */; };
 		2B2E46BA1A80ADA16F5619BE /* RemoteAIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1110270C64A8EB0B8C2EA9F /* RemoteAIView.swift */; };
@@ -32,11 +33,11 @@
 		3C06472E91B886E5B6EA6A38 /* ToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C7FE2100C1F2583D8700B1 /* ToolbarButton.swift */; };
 		3D652045DC5CFAC3C9B72978 /* AIVoice2AutomationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160E04835D058B056DDCA4BC /* AIVoice2AutomationClient.swift */; };
 		40573374BF88BB884C3BF952 /* RemoteAIController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84623892EABB01E79F8ECC54 /* RemoteAIController.swift */; };
+		44C2FD2592D52DBBC2C3EF1B /* AquesTalkPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2EABE0AE0452717078DD7B0 /* AquesTalkPlayerService.swift */; };
 		46828498A9CFD68201C8877B /* CharacterProfileImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425483EC7A479206BBA1250D /* CharacterProfileImporter.swift */; };
 		46FB403B5CCC0341726FC193 /* RemoteAIEditOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545DDDA930C55EC1DB4E1275 /* RemoteAIEditOperations.swift */; };
 		492669085A0E742AAF59EE36 /* VMSCore in Frameworks */ = {isa = PBXBuildFile; productRef = 18C35EE66602CBEC89279C71 /* VMSCore */; };
 		49BEC8C0AD08D0CBCC9FBEC4 /* FontPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAD1321F5271CB2AAAB0CC02 /* FontPickerView.swift */; };
-		4D0A16FDA30CC201707C8461 /* SofTalkPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D7C474440F34D682110ED65 /* SofTalkPanel.swift */; };
 		4DD46757847494F559CDE856 /* TimelineItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F5AF4177FA8321BA9547EB /* TimelineItemView.swift */; };
 		56D3E27A65A9480EFC28158A /* CharacterSettingsPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 740613E707F3EF3E7D2A3931 /* CharacterSettingsPreview.swift */; };
 		5A3DA1274B59D3735D5D2327 /* VideoExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9EC37A06586CCFE80D73F1 /* VideoExporter.swift */; };
@@ -72,11 +73,12 @@
 		AA20AD5BBF46FC46B0A5648A /* MixedValueBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8657C731A20D2BC8FAB94C /* MixedValueBinding.swift */; };
 		AADBA76D38D5C03EC2892034 /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7085879F10A56F9C244DE82 /* UpdateController.swift */; };
 		AF73CEDB0C5D742F8EEF5792 /* FontCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6EC121599D6C3762C1D7EE /* FontCatalog.swift */; };
-		AFC4099892283777327391BB /* SofTalkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37CFA53CBDFC36C0C02B1A8 /* SofTalkConnection.swift */; };
 		BE130245501B038299CC6FB5 /* PSDLayerReviewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA0B15086D1812F17F96AF0 /* PSDLayerReviewerView.swift */; };
+		BEDB1D7F78C1AEEC41CC3329 /* MacSystemVoicePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599FF315797CA1E620840788 /* MacSystemVoicePanel.swift */; };
 		C0A5D520B7258BF7A7F12AFA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACC1D1497A442A340EF4BB3 /* ContentView.swift */; };
 		C1034C40FB4A9A5069037DF3 /* PropertySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBC1546633497B3D3E4B6C5 /* PropertySection.swift */; };
 		C5788D58B24EDCE601F2A274 /* VideoFrameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22419AB0C569DE0C291E124D /* VideoFrameProvider.swift */; };
+		C61751D6A7D880E2CDC5DDC8 /* MacSystemVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7948B5861E6E759658FD9E /* MacSystemVoiceService.swift */; };
 		CA743BE94644C5CCFDE11981 /* AIStoryboardImportReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227C6B1DE8AAECD2502BC375 /* AIStoryboardImportReviewView.swift */; };
 		CAEF3136FECDEC738B2B3CB9 /* CodableColor+SwiftUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90FAD51F7EF644851389B11 /* CodableColor+SwiftUI.swift */; };
 		CB4095E42D1E13B4DE3525DB /* CharacterImageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BA6ED77C6CC9463CBF1C91 /* CharacterImageProvider.swift */; };
@@ -138,6 +140,7 @@
 		4370BBBFFE35005C6B677EB4 /* ProjectFileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectFileActions.swift; sourceTree = "<group>"; };
 		43B5F5B3B72245BE8B8A43D5 /* CommandRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRegistry.swift; sourceTree = "<group>"; };
 		483B6AA7AD9185B36592993B /* CompositeFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompositeFrameView.swift; sourceTree = "<group>"; };
+		4A003E602FEC1CF2F6BC4E6F /* AquesTalkPlayerPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquesTalkPlayerPanel.swift; sourceTree = "<group>"; };
 		4D7678D66654A23A5CD697AC /* EffectList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectList.swift; sourceTree = "<group>"; };
 		4F0423F82BB7D86D7052F462 /* ChatDirectorController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDirectorController.swift; sourceTree = "<group>"; };
 		51AA23B1311F0EBB87E2D545 /* PSDLayerExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLayerExtractor.swift; sourceTree = "<group>"; };
@@ -145,10 +148,12 @@
 		53E8E1D39A58D37C5DC39586 /* VideoAssetImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAssetImporter.swift; sourceTree = "<group>"; };
 		545DDDA930C55EC1DB4E1275 /* RemoteAIEditOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteAIEditOperations.swift; sourceTree = "<group>"; };
 		593F45EBA4814EBB5DA74FD1 /* CreditMetadataDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditMetadataDetector.swift; sourceTree = "<group>"; };
+		599FF315797CA1E620840788 /* MacSystemVoicePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSystemVoicePanel.swift; sourceTree = "<group>"; };
 		5B8657C731A20D2BC8FAB94C /* MixedValueBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedValueBinding.swift; sourceTree = "<group>"; };
 		666E3AB27B3DC2FE4F9C990F /* TutorialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialView.swift; sourceTree = "<group>"; };
 		688DBB0ABD65806F2F7D2245 /* CreditDescriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditDescriptionView.swift; sourceTree = "<group>"; };
 		6AA0B15086D1812F17F96AF0 /* PSDLayerReviewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLayerReviewerView.swift; sourceTree = "<group>"; };
+		6B7948B5861E6E759658FD9E /* MacSystemVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSystemVoiceService.swift; sourceTree = "<group>"; };
 		6D5ADD4D1699A731DA970024 /* FontUsageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontUsageStore.swift; sourceTree = "<group>"; };
 		6DBBE1C2DD23230AD3771485 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6E76E787C96A4B5FF84C4EC2 /* VMS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -165,7 +170,6 @@
 		80AF16E82AB49F077D2D7829 /* EditOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditOperations.swift; sourceTree = "<group>"; };
 		8199D89FA6C3E0448D1B9F53 /* LayerTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerTree.swift; sourceTree = "<group>"; };
 		84623892EABB01E79F8ECC54 /* RemoteAIController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteAIController.swift; sourceTree = "<group>"; };
-		8D7C474440F34D682110ED65 /* SofTalkPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SofTalkPanel.swift; sourceTree = "<group>"; };
 		96A655B31FABFF251BDDEC7D /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
 		9CDCCF56B92EB88B3B0CADDC /* RemoteAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteAIClient.swift; sourceTree = "<group>"; };
 		A15FB8AE1A28CEE73D83D1D6 /* EditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCommand.swift; sourceTree = "<group>"; };
@@ -186,7 +190,6 @@
 		BAD1321F5271CB2AAAB0CC02 /* FontPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontPickerView.swift; sourceTree = "<group>"; };
 		C2E2EA16D35D23FE09EDEBB6 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		C36376363E92D5E9D4C9BB32 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
-		C37CFA53CBDFC36C0C02B1A8 /* SofTalkConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SofTalkConnection.swift; sourceTree = "<group>"; };
 		C3C7FE2100C1F2583D8700B1 /* ToolbarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButton.swift; sourceTree = "<group>"; };
 		C61A88CC3EF3636914B3AAB5 /* CommonPropertiesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonPropertiesSection.swift; sourceTree = "<group>"; };
 		CB16DBA7995C3865CCAE87EF /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
@@ -194,6 +197,7 @@
 		D0B0432BCD11046339794F32 /* GradientEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientEditor.swift; sourceTree = "<group>"; };
 		D58899AAA12EF772F07B3604 /* ExternalVoicePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalVoicePanel.swift; sourceTree = "<group>"; };
 		DDE858E247EA84500C3FFFEE /* AI_OPERATION_GUIDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AI_OPERATION_GUIDE.md; sourceTree = "<group>"; };
+		E2EABE0AE0452717078DD7B0 /* AquesTalkPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquesTalkPlayerService.swift; sourceTree = "<group>"; };
 		E3A4B5E29DE14F6E0DC13EFD /* KeyboardShortcutSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardShortcutSpec.swift; sourceTree = "<group>"; };
 		E731BD7BFD3392C55579A1D7 /* TimelineGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineGeometry.swift; sourceTree = "<group>"; };
 		EA3955C0784B8A8BD7B9AD34 /* TogglePropertyControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglePropertyControl.swift; sourceTree = "<group>"; };
@@ -480,10 +484,12 @@
 				160E04835D058B056DDCA4BC /* AIVoice2AutomationClient.swift */,
 				298FACCCB80085399CD5D976 /* AIVoice2Catalog.swift */,
 				B4BCBD09518E22B29195FCED /* AIVoice2Launcher.swift */,
+				4A003E602FEC1CF2F6BC4E6F /* AquesTalkPlayerPanel.swift */,
+				E2EABE0AE0452717078DD7B0 /* AquesTalkPlayerService.swift */,
 				AA77AD1A5D92B0E39870046B /* CharacterVoiceSettingsSection.swift */,
 				D58899AAA12EF772F07B3604 /* ExternalVoicePanel.swift */,
-				C37CFA53CBDFC36C0C02B1A8 /* SofTalkConnection.swift */,
-				8D7C474440F34D682110ED65 /* SofTalkPanel.swift */,
+				599FF315797CA1E620840788 /* MacSystemVoicePanel.swift */,
+				6B7948B5861E6E759658FD9E /* MacSystemVoiceService.swift */,
 				76D5D50063F3084709C73DAD /* VoicePanelView.swift */,
 				17668A922533A12D0A08F382 /* VoiceStylePicker.swift */,
 				F15EEC6C9248814372C43C6D /* VoiceVoxLauncher.swift */,
@@ -584,6 +590,8 @@
 				9E0FBBB0546456EA053233C5 /* AIVoice2Catalog.swift in Sources */,
 				D1381E9EB630CFE5D818BFD5 /* AIVoice2Launcher.swift in Sources */,
 				981CE7FAB45952290A8403E9 /* AddItemOperations.swift in Sources */,
+				24806E52928D3F72AC04087A /* AquesTalkPlayerPanel.swift in Sources */,
+				44C2FD2592D52DBBC2C3EF1B /* AquesTalkPlayerService.swift in Sources */,
 				167E87B2FA76F4F23AC09FCD /* AssetImporter.swift in Sources */,
 				21A50224D3DDF5DD6CD78BD6 /* AudioCompositionBuilder.swift in Sources */,
 				A486A7B5FA4A85B35240B442 /* BulkEditView.swift in Sources */,
@@ -621,6 +629,8 @@
 				FE0A257C18682000138E800B /* KeyboardShortcutSpec.swift in Sources */,
 				EC5104773EA3D2E2DF25F914 /* KeychainStore.swift in Sources */,
 				243A0BA91779BBF539824C02 /* LayerTree.swift in Sources */,
+				BEDB1D7F78C1AEEC41CC3329 /* MacSystemVoicePanel.swift in Sources */,
+				C61751D6A7D880E2CDC5DDC8 /* MacSystemVoiceService.swift in Sources */,
 				DC0F1326459C4331CCB06A9E /* MaterialFileClassifier.swift in Sources */,
 				AA20AD5BBF46FC46B0A5648A /* MixedValueBinding.swift in Sources */,
 				6B8860A6180500C18AB9B061 /* NumericPropertyControl.swift in Sources */,
@@ -643,8 +653,6 @@
 				A932FDD2886DF961FA0BCC79 /* ScenarioImportView.swift in Sources */,
 				2DD75CE26AA092E4F44E5DC7 /* SceneTabBar.swift in Sources */,
 				D01A233FE88E8C6CA7E94711 /* SelectPropertyControl.swift in Sources */,
-				AFC4099892283777327391BB /* SofTalkConnection.swift in Sources */,
-				4D0A16FDA30CC201707C8461 /* SofTalkPanel.swift in Sources */,
 				27190ED60D45048CE590D959 /* StoryboardEditorView.swift in Sources */,
 				FE24188109FABBAEE418C340 /* StoryboardStore.swift in Sources */,
 				343A8AB4C811D07BBFB122F0 /* SubtitleProfileStore.swift in Sources */,
@@ -740,14 +748,14 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.2;
+				CURRENT_PROJECT_VERSION = 1.2.3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = VMS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.2;
+				MARKETING_VERSION = 1.2.3;
 				OTHER_SWIFT_FLAGS = "$(inherited) -debug-prefix-map $(SRCROOT)=/Source -file-prefix-map $(SRCROOT)=/Source";
 				PRODUCT_BUNDLE_IDENTIFIER = com.voicemoviestudio.app;
 				PRODUCT_NAME = VoiceMovieStudio;
@@ -764,14 +772,14 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.2;
+				CURRENT_PROJECT_VERSION = 1.2.3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = VMS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.2;
+				MARKETING_VERSION = 1.2.3;
 				OTHER_SWIFT_FLAGS = "$(inherited) -debug-prefix-map $(SRCROOT)=/Source -file-prefix-map $(SRCROOT)=/Source";
 				PRODUCT_BUNDLE_IDENTIFIER = com.voicemoviestudio.app;
 				PRODUCT_NAME = VoiceMovieStudio;

@@ -52,31 +52,31 @@ import Testing
     #expect(CharacterVoicePreset(character: character).resolveVoiceVox(in: candidates)?.id == 1)
 }
 
-@Test func sofTalkPresetRoundTripsWithoutInventingSpeakerID() throws {
+@Test func macSystemVoicePresetRoundTripsWithoutInventingSpeakerID() throws {
     let source = Character(
         name: "霊夢", baseImageFileName: "reimu.png", defaultSpeakerID: 123,
-        defaultVoiceSettings: .sofTalkDefault,
-        voiceProvider: SofTalkSupport.providerID,
-        voiceLibrary: SofTalkSupport.BuiltInProfile.reimu.rawValue,
-        voiceStyle: SofTalkSupport.BuiltInProfile.reimu.displayName
+        defaultVoiceSettings: MacSystemVoiceSupport.BuiltInProfile.reimu.defaultSettings,
+        voiceProvider: MacSystemVoiceSupport.providerID,
+        voiceLibrary: "com.apple.voice.compact.ja-JP.Kyoko",
+        voiceStyle: "Kyoko"
     )
     let encoded = try JSONEncoder().encode(CharacterVoicePreset(character: source))
     let restored = try JSONDecoder().decode(CharacterVoicePreset.self, from: encoded)
     var target = Character(name: "対象", baseImageFileName: "target.png")
     restored.apply(to: &target)
 
-    #expect(target.voiceProvider == SofTalkSupport.providerID)
-    #expect(target.voiceLibrary == "reimu")
-    #expect(target.voiceStyle == "ゆっくり霊夢")
+    #expect(target.voiceProvider == MacSystemVoiceSupport.providerID)
+    #expect(target.voiceLibrary == "com.apple.voice.compact.ja-JP.Kyoko")
+    #expect(target.voiceStyle == "Kyoko")
     #expect(target.defaultSpeakerID == nil)
 }
 
-@Test func sofTalkSettingsAreFiniteAndClamped() {
+@Test func macSystemVoiceSettingsAreFiniteAndClamped() {
     let settings = VoiceSettings(
         volume: .infinity, pan: -4, pitch: 9, speed: 0,
         intonation: .nan, preSilence: -1, postSilence: 99,
         styleWeights: ["推測した感情": 1]
-    ).validatedForSofTalk()
+    ).validatedForMacSystemVoice()
     #expect(settings.volume == 1)
     #expect(settings.pan == -1)
     #expect(settings.pitch == 2)
@@ -85,4 +85,41 @@ import Testing
     #expect(settings.preSilence == 0)
     #expect(settings.postSilence == 5)
     #expect(settings.styleWeights == nil)
+}
+
+@Test func aquesTalkPlayerCommandUsesDocumentedArgumentsAndOptionalPreset() {
+    #expect(AquesTalkPlayerSupport.commandArguments(
+        text: "こんにちは", presetName: "霊夢用", wavPath: "/tmp/test.wav"
+    ) == ["-T", "こんにちは", "-P", "霊夢用", "-W", "/tmp/test.wav"])
+    #expect(AquesTalkPlayerSupport.commandArguments(
+        text: "こんにちは", presetName: "  ", wavPath: "/tmp/test.wav"
+    ) == ["-T", "こんにちは", "-W", "/tmp/test.wav"])
+}
+
+@Test func aquesTalkPlayerPresetRoundTripsWithoutStoringLicenseKey() throws {
+    let source = Character(
+        name: "霊夢", baseImageFileName: "reimu.png", defaultSpeakerID: 7,
+        voiceProvider: AquesTalkPlayerSupport.providerID,
+        voiceLibrary: "霊夢用",
+        voiceStyle: ""
+    )
+    let data = try JSONEncoder().encode(CharacterVoicePreset(character: source))
+    let encoded = String(decoding: data, as: UTF8.self)
+    #expect(!encoded.localizedCaseInsensitiveContains("license"))
+    let restored = try JSONDecoder().decode(CharacterVoicePreset.self, from: data)
+    var target = Character(name: "対象", baseImageFileName: "target.png")
+    restored.apply(to: &target)
+    #expect(target.voiceProvider == AquesTalkPlayerSupport.providerID)
+    #expect(target.voiceLibrary == "霊夢用")
+    #expect(target.defaultSpeakerID == nil)
+}
+
+@Test func macSystemCharacterProfilesHaveDistinctDefaults() {
+    let reimu = MacSystemVoiceSupport.BuiltInProfile.reimu
+    let marisa = MacSystemVoiceSupport.BuiltInProfile.marisa
+    #expect(reimu.displayName == "霊夢向け")
+    #expect(marisa.displayName == "魔理沙向け")
+    #expect(reimu.preferredVoiceNames.first == "Kyoko")
+    #expect(marisa.preferredVoiceNames.first == "Reed")
+    #expect(reimu.defaultSettings != marisa.defaultSettings)
 }

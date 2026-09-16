@@ -8,6 +8,7 @@ struct ExportView: View {
     @State private var exporter = VideoExporter()
     @State private var errorMessage: String?
     @State private var didFinish = false
+    @AppStorage(AquesTalkPlayerSettings.publicLicenseIDKey) private var aquesTalkPublicLicenseID = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -19,6 +20,21 @@ struct ExportView: View {
             LabeledContent("解像度") { Text("\(Int(project.resolution.width)) x \(Int(project.resolution.height))") }
             LabeledContent("フレームレート") { Text("\(Int(project.frameRate)) fps") }
             LabeledContent("長さ") { Text(String(format: "%.2fs", timeline.duration)) }
+
+            if ProjectCreditBuilder.usesAquesTalkPlayer(project: project) {
+                GroupBox("AquesTalk Playerの利用条件") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(AquesTalkPlayerSupport.commercialUseNotice)
+                            .font(.caption).foregroundStyle(.orange)
+                        if aquesTalkPublicLicenseID.isEmpty {
+                            Text("公開用ライセンスIDはクレジット画面から設定できます。秘密のライセンスキーは入力しないでください。")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                        Link("公式の利用条件を確認", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
+                            .font(.caption)
+                    }
+                }
+            }
 
             if exporter.isExporting {
                 ProgressView(value: exporter.progress) {
@@ -45,7 +61,7 @@ struct ExportView: View {
             }
         }
         .padding(20)
-        .frame(width: 420)
+        .frame(width: 480)
     }
 
     private func startExport() {

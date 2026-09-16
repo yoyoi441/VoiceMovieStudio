@@ -241,8 +241,9 @@ public enum AIStoryboardExchange {
                         provider: character.voiceProvider,
                         library: character.voiceLibrary,
                         style: character.voiceStyle,
-                        isConfigured: !character.voiceProvider.isEmpty &&
-                            (!character.voiceLibrary.isEmpty || character.defaultSpeakerID != nil)
+                        isConfigured: character.voiceProvider == AquesTalkPlayerSupport.providerID
+                            || (!character.voiceProvider.isEmpty &&
+                                (!character.voiceLibrary.isEmpty || character.defaultSpeakerID != nil))
                     )
                 )
             },

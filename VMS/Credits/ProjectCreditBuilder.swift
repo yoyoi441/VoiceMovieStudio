@@ -8,6 +8,16 @@ struct ProjectCreditEntry: Identifiable {
 }
 
 enum ProjectCreditBuilder {
+    static func usesAquesTalkPlayer(project: Project) -> Bool {
+        project.scenes
+            .flatMap(\.timeline.tracks)
+            .flatMap(\.clips)
+            .contains { clip in
+                guard case .audio(let data) = clip.content else { return false }
+                return data.voiceProvider == AquesTalkPlayerSupport.providerID
+            }
+    }
+
     static func usedEntries(project: Project) -> [ProjectCreditEntry] {
         let clips = project.scenes.flatMap(\.timeline.tracks).flatMap(\.clips)
         let usedCharacterIDs = Set(clips.compactMap { clip -> UUID? in
@@ -36,10 +46,20 @@ enum ProjectCreditBuilder {
         }
     }
 
-    static func descriptionText(project: Project) -> String {
+    static func descriptionText(project: Project, aquesTalkPublicLicenseID: String = "") -> String {
         let entries = usedEntries(project: project)
-        guard !entries.isEmpty else { return "使用素材は登録されていません。" }
-        var lines = ["【使用素材・クレジット】"]
+        let usesAquesTalk = usesAquesTalkPlayer(project: project)
+        guard !entries.isEmpty || usesAquesTalk else { return "使用素材は登録されていません。" }
+        var lines: [String] = []
+        if usesAquesTalk {
+            lines += ["【音声合成】", "・AquesTalk Player / AQUEST"]
+            let publicID = aquesTalkPublicLicenseID.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !publicID.isEmpty { lines.append("  公開用ライセンスID: \(publicID)") }
+        }
+        if !entries.isEmpty {
+            if !lines.isEmpty { lines.append("") }
+            lines.append("【使用素材・クレジット】")
+        }
         for entry in entries {
             var line = "・[\(entry.category)] \(entry.credit.title)"
             if !entry.credit.creator.isEmpty { line += " / \(entry.credit.creator)" }

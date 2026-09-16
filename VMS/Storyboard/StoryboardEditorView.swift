@@ -347,7 +347,8 @@ private struct StoryboardCardInspector: View {
     private var voiceGenerationTitle: String {
         switch assignedCharacter?.voiceProvider {
         case "A.I.VOICE2": "A.I.VOICE2で音声生成"
-        case SofTalkSupport.providerID: "SofTalkで音声生成"
+        case AquesTalkPlayerSupport.providerID: "AquesTalk Playerで音声生成"
+        case MacSystemVoiceSupport.providerID: "Mac音声で生成"
         default: "VOICEVOXで音声生成"
         }
     }
@@ -355,7 +356,10 @@ private struct StoryboardCardInspector: View {
         guard !card.dialogue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let character = assignedCharacter else { return false }
         if character.voiceProvider == "A.I.VOICE2" { return !character.voiceLibrary.isEmpty }
-        if character.voiceProvider == SofTalkSupport.providerID { return !character.voiceLibrary.isEmpty }
+        if character.voiceProvider == AquesTalkPlayerSupport.providerID {
+            return AquesTalkPlayerService.isReady
+        }
+        if character.voiceProvider == MacSystemVoiceSupport.providerID { return !character.voiceLibrary.isEmpty }
         return (character.voiceProvider.isEmpty || character.voiceProvider == "VOICEVOX")
             && character.defaultSpeakerID != nil
     }
@@ -404,15 +408,23 @@ private struct StoryboardCardInspector: View {
                     data.licenseNotes = character?.usageTerms ?? ""
                     result.audioClip.content = .audio(data)
                 }
-            } else if let assignment, assignment.provider == SofTalkSupport.providerID {
+            } else if let assignment, assignment.provider == AquesTalkPlayerSupport.providerID {
+                result = try await AquesTalkPlayerService.importSpeech(
+                    text: original.dialogue,
+                    presetName: assignment.speakerName,
+                    character: character,
+                    startTime: 0,
+                    assetsDirectory: assets
+                )
+            } else if let assignment, assignment.provider == MacSystemVoiceSupport.providerID {
                 guard !assignment.speakerName.isEmpty else {
-                    store.errorMessage = "キャラクター管理でSofTalkの話者プリセットを指定してください。"
+                    store.errorMessage = "キャラクター管理でMacの日本語音声を指定してください。"
                     return
                 }
-                result = try await SofTalkSynthesisService.importSpeech(
+                result = try await MacSystemVoiceSynthesisService.importSpeech(
                     text: original.dialogue,
-                    profileID: assignment.speakerName,
-                    settings: assignment.settings.validatedForSofTalk(),
+                    voiceIdentifier: assignment.speakerName,
+                    settings: assignment.settings.validatedForMacSystemVoice(),
                     character: character,
                     startTime: 0,
                     assetsDirectory: assets

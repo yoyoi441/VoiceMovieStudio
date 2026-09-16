@@ -10,7 +10,8 @@ struct CharacterVoiceSettingsSection: View {
     @State private var draftName = ""
     @State private var draftStyle = ""
     @State private var draftSettings = VoiceSettings()
-    @State private var sofTalk = SofTalkConnectionController.shared
+    @State private var aquesTalkInstallation: AquesTalkPlayerInstallation?
+    @AppStorage(AquesTalkPlayerSettings.licenseAcknowledgedKey) private var aquesTalkLicenseAcknowledged = false
 
     var body: some View {
         PropertySection("音声ソフト・話者") {
@@ -18,8 +19,10 @@ struct CharacterVoiceSettingsSection: View {
                 Text("未指定").tag("")
                 Text("VOICEVOX").tag("VOICEVOX")
                 Text("A.I.VOICE2").tag("A.I.VOICE2")
-                Text("SofTalk").tag(SofTalkSupport.providerID)
-                if !["", "VOICEVOX", "A.I.VOICE2", SofTalkSupport.providerID].contains(character.voiceProvider) {
+                Text("AquesTalk Player").tag(AquesTalkPlayerSupport.providerID)
+                Text("Mac音声").tag(MacSystemVoiceSupport.providerID)
+                if !["", "VOICEVOX", "A.I.VOICE2", AquesTalkPlayerSupport.providerID, MacSystemVoiceSupport.providerID]
+                    .contains(character.voiceProvider) {
                     Text("保存済み：\(character.voiceProvider)").tag(character.voiceProvider)
                 }
             }
@@ -61,30 +64,53 @@ struct CharacterVoiceSettingsSection: View {
                     Button("音声初期値を保存") { saveSettings() }
                 }
                 Text(store.aiv2Catalog.status).font(.caption).foregroundStyle(.secondary)
-            } else if character.voiceProvider == SofTalkSupport.providerID {
-                TextField("接続先（https://…）", text: $sofTalk.endpoint)
-                    .onChange(of: sofTalk.endpoint) { _, _ in sofTalk.connectionSettingsChanged() }
-                SecureField("接続トークン", text: $sofTalk.tokenDraft)
-                    .onChange(of: sofTalk.tokenDraft) { _, _ in sofTalk.connectionSettingsChanged() }
+            } else if character.voiceProvider == AquesTalkPlayerSupport.providerID {
                 HStack {
-                    Button("SofTalkへ接続") { Task { await sofTalk.connect() } }
-                        .disabled(sofTalk.isWorking)
-                    Button("SofTalkを起動") { Task { await launchSofTalk() } }
-                        .disabled(sofTalk.info == nil || sofTalk.isWorking)
+                    Button("AquesTalk Playerを起動") {
+                        Task {
+                            do { try await AquesTalkPlayerService.launch() }
+                            catch { message = error.localizedDescription }
+                        }
+                    }
+                    .disabled(aquesTalkInstallation == nil)
+                    Button("アプリを選択…") {
+                        if let selected = AquesTalkPlayerService.selectApplication() {
+                            aquesTalkInstallation = selected
+                        }
+                    }
+                    Link("公式サイト", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
                 }
-                Picker("話者プリセット", selection: stringBinding(\.voiceLibrary)) {
-                    Text("未指定").tag("")
-                    ForEach(sofTalk.profiles) { profile in
-                        Text(profile.isConfigured ? profile.displayName : "\(profile.displayName)（未設定）")
-                            .tag(profile.id)
+                Text(aquesTalkInstallation.map { "検出済み v\($0.version)" } ?? "AquesTalk Playerは未検出です。")
+                    .font(.caption)
+                    .foregroundStyle(aquesTalkInstallation == nil ? Color.orange : Color.secondary)
+                TextField("プリセット名（空欄はPlayerの最後の設定）", text: stringBinding(\.voiceLibrary))
+                Text(AquesTalkPlayerSupport.commercialUseNotice)
+                    .font(.caption).foregroundStyle(.orange)
+                Toggle("公式の利用条件を確認しました", isOn: $aquesTalkLicenseAcknowledged)
+                HStack {
+                    Link("利用条件", destination: URL(string: AquesTalkPlayerSupport.officialPageURL)!)
+                    Link("使用ライセンス", destination: URL(string: AquesTalkPlayerSupport.licenseStoreURL)!)
+                }.font(.caption)
+                Text("ライセンスキーはAquesTalk Player側で設定し、VMSには入力しません。")
+                    .font(.caption2).foregroundStyle(.secondary)
+            } else if character.voiceProvider == MacSystemVoiceSupport.providerID {
+                HStack {
+                    Button("霊夢向け") { applyMacProfile(.reimu) }
+                    Button("魔理沙向け") { applyMacProfile(.marisa) }
+                }
+                Picker("Macの日本語音声", selection: macVoiceBinding) {
+                    if MacSystemVoiceCatalog.japaneseVoices.isEmpty {
+                        Text("日本語音声が見つかりません").tag("")
+                    }
+                    ForEach(MacSystemVoiceCatalog.japaneseVoices) { voice in
+                        Text(voice.displayName).tag(voice.id)
                     }
                 }
                 DisclosureGroup("音量・話速・高さの初期値") {
-                    SofTalkDraftControls(settings: $draftSettings)
+                    MacSystemVoiceDraftControls(settings: $draftSettings)
                     Button("音声初期値を保存") { saveSettings() }
                 }
-                Text(sofTalk.message).font(.caption).foregroundStyle(.secondary)
-                Text("霊夢・魔理沙の声はWindows側で割り当て済みの場合だけ生成できます。音源はアプリに同梱しません。")
+                Text("Mac内の日本語音声だけで生成します。霊夢向け・魔理沙向けは初期候補なので、試聴して好きな声へ変更できます。")
                     .font(.caption2).foregroundStyle(.secondary)
             }
             LabeledContent("保存中の話者", value: character.voiceLibrary.isEmpty ? "未指定" : character.voiceLibrary)
@@ -110,12 +136,13 @@ struct CharacterVoiceSettingsSection: View {
         .onChange(of: character.defaultVoiceSettings, initial: true) { _, value in
             if character.voiceProvider == "A.I.VOICE2" {
                 draftSettings = value.validatedForAIVoice2()
-            } else if character.voiceProvider == SofTalkSupport.providerID {
-                draftSettings = value.validatedForSofTalk()
+            } else if character.voiceProvider == MacSystemVoiceSupport.providerID {
+                draftSettings = value.validatedForMacSystemVoice()
             } else {
                 draftSettings = value.validatedForVoiceVox()
             }
         }
+        .onAppear { aquesTalkInstallation = AquesTalkPlayerService.installation() }
     }
 
     private func edit(_ change: (inout Character) -> Void) {
@@ -132,13 +159,25 @@ struct CharacterVoiceSettingsSection: View {
                     $0.voiceStyle = ""
                     $0.defaultSpeakerID = nil
                     if value == "A.I.VOICE2" { $0.defaultVoiceSettings = .aIVoice2Default }
-                    else if value == SofTalkSupport.providerID { $0.defaultVoiceSettings = .sofTalkDefault }
+                    else if value == AquesTalkPlayerSupport.providerID {
+                        $0.defaultVoiceSettings = VoiceSettings()
+                    }
+                    else if value == MacSystemVoiceSupport.providerID {
+                        $0.defaultVoiceSettings = MacSystemVoiceSupport.BuiltInProfile.reimu.defaultSettings
+                        if let voice = MacSystemVoiceCatalog.voice(for: .reimu) {
+                            $0.voiceLibrary = voice.id
+                            $0.voiceStyle = voice.name
+                        }
+                    }
                     else { $0.defaultVoiceSettings = VoiceSettings() }
                 }
             }
             if key == \.voiceProvider {
                 if value == "A.I.VOICE2" { draftSettings = .aIVoice2Default }
-                else if value == SofTalkSupport.providerID { draftSettings = .sofTalkDefault }
+                else if value == AquesTalkPlayerSupport.providerID { draftSettings = VoiceSettings() }
+                else if value == MacSystemVoiceSupport.providerID {
+                    draftSettings = MacSystemVoiceSupport.BuiltInProfile.reimu.defaultSettings
+                }
                 else { draftSettings = VoiceSettings() }
             }
         })
@@ -158,9 +197,13 @@ struct CharacterVoiceSettingsSection: View {
                 )
                 updated.voiceStyle = updated.defaultVoiceSettings.styleWeights?
                     .max(by: { $0.value < $1.value })?.key ?? ""
-            } else if updated.voiceProvider == SofTalkSupport.providerID {
-                updated.defaultVoiceSettings = draftSettings.validatedForSofTalk()
-                updated.voiceStyle = SofTalkSupport.displayName(for: updated.voiceLibrary)
+            } else if updated.voiceProvider == MacSystemVoiceSupport.providerID {
+                updated.defaultVoiceSettings = draftSettings.validatedForMacSystemVoice()
+                updated.voiceStyle = MacSystemVoiceCatalog.voice(identifier: updated.voiceLibrary)?.name ?? ""
+                updated.defaultSpeakerID = nil
+            } else if updated.voiceProvider == AquesTalkPlayerSupport.providerID {
+                updated.defaultVoiceSettings = VoiceSettings()
+                updated.voiceStyle = ""
                 updated.defaultSpeakerID = nil
             } else {
                 updated.defaultVoiceSettings = draftSettings.validatedForVoiceVox()
@@ -177,8 +220,32 @@ struct CharacterVoiceSettingsSection: View {
         } catch { message = error.localizedDescription }
     }
 
-    private func launchSofTalk() async {
-        do { try await sofTalk.launch(); message = sofTalk.message }
-        catch { message = error.localizedDescription }
+    private var macVoiceBinding: Binding<String> {
+        Binding(
+            get: { character.voiceLibrary },
+            set: { identifier in
+                edit {
+                    $0.voiceLibrary = identifier
+                    $0.voiceStyle = MacSystemVoiceCatalog.voice(identifier: identifier)?.name ?? ""
+                    $0.defaultSpeakerID = nil
+                }
+            }
+        )
+    }
+
+    private func applyMacProfile(_ profile: MacSystemVoiceSupport.BuiltInProfile) {
+        guard let voice = MacSystemVoiceCatalog.voice(for: profile) else {
+            message = "利用できる日本語音声がありません。"
+            return
+        }
+        draftSettings = profile.defaultSettings.validatedForMacSystemVoice()
+        edit {
+            $0.voiceProvider = MacSystemVoiceSupport.providerID
+            $0.voiceLibrary = voice.id
+            $0.voiceStyle = voice.name
+            $0.defaultSpeakerID = nil
+            $0.defaultVoiceSettings = draftSettings
+        }
+        message = "\(profile.displayName)に\(voice.name)を設定しました。"
     }
 }

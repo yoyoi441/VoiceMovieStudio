@@ -26,8 +26,11 @@ struct BulkEditView: View {
         guard let targetCharacter else { return false }
         let configured: Bool
         if targetCharacter.voiceProvider == "A.I.VOICE2"
-            || targetCharacter.voiceProvider == SofTalkSupport.providerID {
-            configured = !targetCharacter.voiceLibrary.isEmpty
+            || targetCharacter.voiceProvider == AquesTalkPlayerSupport.providerID
+            || targetCharacter.voiceProvider == MacSystemVoiceSupport.providerID {
+            configured = targetCharacter.voiceProvider == AquesTalkPlayerSupport.providerID
+                ? AquesTalkPlayerService.isReady
+                : !targetCharacter.voiceLibrary.isEmpty
         } else {
             configured = (targetCharacter.voiceProvider.isEmpty || targetCharacter.voiceProvider == "VOICEVOX")
                 && targetCharacter.defaultSpeakerID != nil

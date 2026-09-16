@@ -62,8 +62,10 @@ extension ProjectStore {
         }
         if regenerateVoice {
             let canGenerate = if target.voiceProvider == "A.I.VOICE2"
-                || target.voiceProvider == SofTalkSupport.providerID {
+                || target.voiceProvider == MacSystemVoiceSupport.providerID {
                 !target.voiceLibrary.isEmpty
+            } else if target.voiceProvider == AquesTalkPlayerSupport.providerID {
+                AquesTalkPlayerService.isReady
             } else {
                 (target.voiceProvider.isEmpty || target.voiceProvider == "VOICEVOX")
                     && target.defaultSpeakerID != nil
@@ -125,17 +127,27 @@ extension ProjectStore {
                         )
                         amplitudeMouthKeyframes = analysis.mouthKeyframes
                         expectedProvider = "A.I.VOICE2"
-                    } else if target.voiceProvider == SofTalkSupport.providerID {
-                        settings = target.defaultVoiceSettings.validatedForSofTalk()
-                        let result = try await SofTalkSynthesisService.speech(
+                    } else if target.voiceProvider == AquesTalkPlayerSupport.providerID {
+                        settings = VoiceSettings()
+                        let result = try await AquesTalkPlayerService.speech(
                             text: sourceText,
-                            profileID: target.voiceLibrary,
+                            presetName: target.voiceLibrary,
+                            mouthSpeed: target.defaultMouthSpeed
+                        )
+                        speech = result.speech
+                        amplitudeMouthKeyframes = result.mouthKeyframes
+                        expectedProvider = AquesTalkPlayerSupport.providerID
+                    } else if target.voiceProvider == MacSystemVoiceSupport.providerID {
+                        settings = target.defaultVoiceSettings.validatedForMacSystemVoice()
+                        let result = try await MacSystemVoiceSynthesisService.speech(
+                            text: sourceText,
+                            voiceIdentifier: target.voiceLibrary,
                             settings: settings,
                             mouthSpeed: target.defaultMouthSpeed
                         )
                         speech = result.speech
                         amplitudeMouthKeyframes = result.mouthKeyframes
-                        expectedProvider = SofTalkSupport.providerID
+                        expectedProvider = MacSystemVoiceSupport.providerID
                     } else {
                         guard let speakerID = target.defaultSpeakerID else {
                             throw SpeechRegeneration.Failure.invalid
@@ -156,7 +168,8 @@ extension ProjectStore {
                     var configuredData = originalData
                     configuredData.voiceProvider = expectedProvider
                     configuredData.speakerID = target.voiceProvider == "A.I.VOICE2"
-                        || target.voiceProvider == SofTalkSupport.providerID
+                        || target.voiceProvider == AquesTalkPlayerSupport.providerID
+                        || target.voiceProvider == MacSystemVoiceSupport.providerID
                         ? nil : target.defaultSpeakerID
                     configuredData.voiceLibrary = target.voiceLibrary
                     configuredData.voiceStyle = target.voiceStyle

@@ -86,13 +86,13 @@ struct VoiceSettingsInspector: View {
                     }
                     regenerationButton { await regenerateAIVoice2(data) }
                         .disabled(isRegenerating || data.sourceText == nil || data.voiceLibrary?.isEmpty != false)
-                } else if data.voiceProvider == SofTalkSupport.providerID {
-                    Text("音声元: SofTalk ／ 話者: \(SofTalkSupport.displayName(for: data.voiceLibrary ?? "未指定"))")
+                } else if data.voiceProvider == MacSystemVoiceSupport.providerID {
+                    Text("音声元: Mac音声 ／ 話者: \(macVoiceName(data.voiceLibrary))")
                         .font(.caption)
                     NumericPropertyControl(
                         label: "音量",
-                        value: voiceNumeric({ $0.volume }, { $0.volume = min(2, max(0, $1)) }),
-                        range: 0...2, step: 0.01, decimalPlaces: 2, resetValue: 1
+                        value: voiceNumeric({ $0.volume }, { $0.volume = min(1, max(0, $1)) }),
+                        range: 0...1, step: 0.01, decimalPlaces: 2, resetValue: 1
                     )
                     NumericPropertyControl(
                         label: "読み上げ速度",
@@ -104,8 +104,17 @@ struct VoiceSettingsInspector: View {
                         value: voiceNumeric({ $0.pitch }, { $0.pitch = min(2, max(0.5, $1)) }),
                         range: 0.5...2, step: 0.01, decimalPlaces: 2, unit: "×", resetValue: 1
                     )
-                    regenerationButton { await regenerateSofTalk(data) }
+                    regenerationButton { await regenerateMacSystemVoice(data) }
                         .disabled(isRegenerating || data.sourceText == nil || data.voiceLibrary?.isEmpty != false)
+                } else if data.voiceProvider == AquesTalkPlayerSupport.providerID {
+                    Text("音声元: AquesTalk Player")
+                        .font(.caption)
+                    Text("プリセット: \(data.voiceLibrary?.isEmpty == false ? data.voiceLibrary! : "Playerで最後に選択したもの")")
+                        .font(.caption)
+                    Text(AquesTalkPlayerSupport.commercialUseNotice)
+                        .font(.caption2).foregroundStyle(.orange)
+                    regenerationButton { await regenerateAquesTalkPlayer(data) }
+                        .disabled(isRegenerating || data.sourceText == nil || !AquesTalkPlayerService.isReady)
                 } else if let provider = data.voiceProvider {
                     Text("音声元: \(provider) ／ 再合成は製品側で行ってください").font(.caption)
                 }
@@ -142,6 +151,11 @@ struct VoiceSettingsInspector: View {
     private func aiv2StyleNames(_ data: AudioClipData) -> [String] {
         let saved = data.voiceSettings.styleWeights?.keys.map { $0 } ?? []
         return Array(Set(store.aiv2Catalog.styleNames + saved)).sorted()
+    }
+
+    private func macVoiceName(_ identifier: String?) -> String {
+        guard let identifier, !identifier.isEmpty else { return "未指定" }
+        return MacSystemVoiceCatalog.voice(identifier: identifier)?.name ?? "利用できない音声"
     }
 
     private func preview(_ data: AudioClipData) {
@@ -257,10 +271,10 @@ struct VoiceSettingsInspector: View {
         } catch { store.errorMessage = error.localizedDescription }
     }
 
-    private func regenerateSofTalk(_ data: AudioClipData) async {
-        guard data.voiceProvider == SofTalkSupport.providerID,
+    private func regenerateMacSystemVoice(_ data: AudioClipData) async {
+        guard data.voiceProvider == MacSystemVoiceSupport.providerID,
               let sourceText = data.sourceText,
-              let profileID = data.voiceLibrary, !profileID.isEmpty else { return }
+              let voiceIdentifier = data.voiceLibrary, !voiceIdentifier.isEmpty else { return }
         isRegenerating = true
         defer { isRegenerating = false }
         let original = primary
@@ -268,10 +282,10 @@ struct VoiceSettingsInspector: View {
         let sceneID = store.currentSceneID
         let directory = store.assetsDirectory
         do {
-            let generated = try await SofTalkSynthesisService.speech(
+            let generated = try await MacSystemVoiceSynthesisService.speech(
                 text: sourceText,
-                profileID: profileID,
-                settings: data.voiceSettings.validatedForSofTalk(),
+                voiceIdentifier: voiceIdentifier,
+                settings: data.voiceSettings.validatedForMacSystemVoice(),
                 mouthSpeed: 1
             )
             guard store.project.id == projectID, store.currentSceneID == sceneID,
@@ -283,7 +297,42 @@ struct VoiceSettingsInspector: View {
                 speech: generated.speech,
                 fileName: fileName,
                 mouthSpeeds: [:],
-                expectedProvider: SofTalkSupport.providerID,
+                expectedProvider: MacSystemVoiceSupport.providerID,
+                amplitudeMouthKeyframes: generated.mouthKeyframes
+            )
+            try generated.speech.audioData.write(
+                to: directory.appendingPathComponent(fileName), options: .atomic
+            )
+            store.beginUndoableChange()
+            store.currentTimeline = updatedTimeline
+        } catch { store.errorMessage = error.localizedDescription }
+    }
+
+    private func regenerateAquesTalkPlayer(_ data: AudioClipData) async {
+        guard data.voiceProvider == AquesTalkPlayerSupport.providerID,
+              let sourceText = data.sourceText else { return }
+        isRegenerating = true
+        defer { isRegenerating = false }
+        let original = primary
+        let projectID = store.project.id
+        let sceneID = store.currentSceneID
+        let directory = store.assetsDirectory
+        do {
+            let generated = try await AquesTalkPlayerService.speech(
+                text: sourceText,
+                presetName: data.voiceLibrary ?? "",
+                mouthSpeed: 1
+            )
+            guard store.project.id == projectID, store.currentSceneID == sceneID,
+                  store.assetsDirectory == directory else { throw SpeechRegeneration.Failure.targetChanged }
+            let fileName = "voice_\(UUID().uuidString).wav"
+            let updatedTimeline = try SpeechRegeneration.replacing(
+                original: original,
+                in: store.currentTimeline,
+                speech: generated.speech,
+                fileName: fileName,
+                mouthSpeeds: [:],
+                expectedProvider: AquesTalkPlayerSupport.providerID,
                 amplitudeMouthKeyframes: generated.mouthKeyframes
             )
             try generated.speech.audioData.write(

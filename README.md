@@ -11,7 +11,8 @@ macOS向けの動画編集アプリです。動画・画像・音声・キャラ
 - Apple SiliconまたはIntel Mac（AIワーカーはApple Silicon推奨）
 - 動画出力に必要な十分な空き容量
 - 音声生成を使用する場合は対応する音声エンジン
-- SofTalk連携を使用する場合は、SofTalkと利用可能な音源を導入したWindows PC、Python 3、HTTPS接続
+- Mac音声を使用する場合は、macOSにインストールされた日本語システム音声
+- AquesTalk Player連携を使用する場合は、利用者が公式サイトから導入したMac版AquesTalk Player
 
 ## インストール
 
@@ -41,9 +42,15 @@ macOS向けの動画編集アプリです。動画・画像・音声・キャラ
 
 詳しい説明はアプリ内の「ヘルプセンター」を参照してください。
 
-## SofTalk連携
+## Macローカル音声
 
-音声パネルとキャラクタープリセットでSofTalkを選び、Windows側で明示的に割り当てた「ゆっくり霊夢」「ゆっくり魔理沙」の声を利用できます。VMSはSofTalk本体・音声合成エンジン・音源を同梱せず、声番号も推測しません。Windows用ブリッジの導入と安全な接続方法は[SofTalkBridge/README.md](Tools/SofTalkBridge/README.md)を参照してください。
+音声パネルとキャラクタープリセットで「Mac音声」を選ぶと、別PCや接続設定なしでmacOSの日本語システム音声を使用できます。「霊夢向け」「魔理沙向け」は声・高さ・話速の初期候補で、Mac内のKyokoとReedを優先します。特定の市販音源と同じ声ではないため、試聴してキャラクターごとに調整してください。
+
+## AquesTalk Player連携
+
+利用者が公式サイトから導入したMac版AquesTalk Playerを検出し、公式のコマンド実行機能でWAVを生成できます。プリセット名はキャラクターごとに保存され、音声・字幕・音量ベースの口パクへ反映されます。AquesTalk Player本体や音声ライブラリは本アプリへ同梱・再配布しません。
+
+AquesTalk Playerは個人かつ非営利の場合に限り無償です。収益化、業務、個人事業、法人・団体・教育機関での利用にはAQUESTの使用ライセンスが必要です。秘密のライセンスキーはAquesTalk Player側だけで設定し、本アプリ、プロジェクト、Gitへ保存しないでください。最新条件は[AQUEST公式ページ](https://www.a-quest.com/products/aquestalkplayer.html)で確認してください。
 
 ## ローカル／リモートAI
 

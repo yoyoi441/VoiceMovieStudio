@@ -23,12 +23,15 @@ struct VoicePanelView: View {
             Picker("音声連携", selection: $provider) {
                 Text("VOICEVOX").tag("VOICEVOX")
                 Text("A.I.VOICE2").tag("A.I.VOICE2")
-                Text("SofTalk").tag(SofTalkSupport.providerID)
+                Text("AquesTalk").tag(AquesTalkPlayerSupport.providerID)
+                Text("Mac音声").tag(MacSystemVoiceSupport.providerID)
             }.pickerStyle(.segmented).disabled(isSynthesizing)
             characterPicker.disabled(isSynthesizing || store.aiv2Catalog.isBusy)
 
-            if provider == SofTalkSupport.providerID {
-                SofTalkPanel(characterID: $selectedCharacterID).id(provider)
+            if provider == MacSystemVoiceSupport.providerID {
+                MacSystemVoicePanel(characterID: $selectedCharacterID).id(provider)
+            } else if provider == AquesTalkPlayerSupport.providerID {
+                AquesTalkPlayerPanel(characterID: $selectedCharacterID).id(provider)
             } else if provider != "VOICEVOX" {
                 ExternalVoicePanel(provider: provider, characterID: $selectedCharacterID).id(provider)
             } else {
@@ -136,7 +139,8 @@ struct VoicePanelView: View {
 
     private func applyVoicePreset() {
         guard let assignment = selectedVoicePreset else { return }
-        guard ["VOICEVOX", "A.I.VOICE2", SofTalkSupport.providerID].contains(assignment.provider) else { return }
+        guard ["VOICEVOX", "A.I.VOICE2", AquesTalkPlayerSupport.providerID, MacSystemVoiceSupport.providerID]
+            .contains(assignment.provider) else { return }
         provider = assignment.provider
         if assignment.provider == "VOICEVOX" {
             draftSettings = assignment.settings.validatedForVoiceVox()
